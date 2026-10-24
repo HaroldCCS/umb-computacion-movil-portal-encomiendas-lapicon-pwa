@@ -1,0 +1,9 @@
+{
+  "endpoint": "GET /api/users/e6GUAvw1cFY7VGSwUQkrTPIrAre2",
+  "fecha": "2026-10-22",
+  "body": null,
+  "status": 403,
+  "respuesta": {
+    "error": "No autorizado para consultar este usuario"
+  }
+}

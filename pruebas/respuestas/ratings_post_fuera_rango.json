@@ -1,0 +1,14 @@
+{
+  "endpoint": "POST /api/ratings",
+  "fecha": "2026-10-22",
+  "body": {
+    "usuarioDestino": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+    "rolDestino": "remitente",
+    "calificacion": 9,
+    "comentario": "x"
+  },
+  "status": 500,
+  "respuesta": {
+    "error": "Error interno al guardar calificación"
+  }
+}

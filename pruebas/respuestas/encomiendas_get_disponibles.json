@@ -1,0 +1,32 @@
+{
+  "endpoint": "GET /api/encomiendas/disponibles?origen=Bogota&destino=Miami",
+  "fecha": "2026-10-22",
+  "body": null,
+  "status": 200,
+  "respuesta": [
+    {
+      "_id": "6ad95be0f8b6da54469cfc57",
+      "ciudadOrigen": "Bogota",
+      "ciudadDestino": "Miami",
+      "observaciones": "demo taller flutter",
+      "valor": 10,
+      "moneda": "USD",
+      "estado": "disponible",
+      "remitenteNombre": "Manuel",
+      "fechaCreacion": "2026-10-22T00:42:08.556Z",
+      "fechaVencimiento": "2026-11-22T00:42:08.556Z"
+    },
+    {
+      "_id": "6ada5d86a4012aeb7e63d853",
+      "ciudadOrigen": "Bogota",
+      "ciudadDestino": "Miami",
+      "observaciones": "Prueba Lapticon: libro pequeño",
+      "valor": 15,
+      "moneda": "USD",
+      "estado": "disponible",
+      "remitenteNombre": "Harold",
+      "fechaCreacion": "2026-10-22T19:01:26.915Z",
+      "fechaVencimiento": "2026-11-22T19:01:26.915Z"
+    }
+  ]
+}

@@ -1,0 +1,22 @@
+{
+  "endpoint": "GET /api/ratings/IeMGfjHQ7XTc0W08QrTzx1flvo13",
+  "fecha": "2026-10-22",
+  "body": null,
+  "status": 200,
+  "respuesta": {
+    "total": 1,
+    "promedio": 5,
+    "calificaciones": [
+      {
+        "_id": "6ada5e83a4012aeb7e63d87f",
+        "usuarioOrigen": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+        "usuarioDestino": "IeMGfjHQ7XTc0W08QrTzx1flvo13",
+        "rolDestino": "viajero",
+        "calificacion": 5,
+        "comentario": "Prueba antes de entregar",
+        "timestamp": "2026-10-22T19:05:39.400Z",
+        "__v": 0
+      }
+    ]
+  }
+}

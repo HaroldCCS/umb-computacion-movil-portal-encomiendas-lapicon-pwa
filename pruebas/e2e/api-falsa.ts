@@ -2,7 +2,7 @@ import type { BrowserContext, Page, Route } from '@playwright/test'
 
 /**
  * Backend falso para las E2E: responde como el real (docs/03 y las respuestas
- * guardadas en referencias/respuestas/), con estado en memoria compartido
+ * guardadas en pruebas/respuestas/), con estado en memoria compartido
  * entre páginas. Así un remitente y un viajero pueden hacer el flujo completo.
  * Los tres endpoints que hoy fallan en el servidor responden 500 igual que allá.
  */

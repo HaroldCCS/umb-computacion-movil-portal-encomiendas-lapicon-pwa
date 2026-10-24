@@ -1,0 +1,9 @@
+{
+  "endpoint": "GET /api/users/Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+  "fecha": "2026-10-22",
+  "body": null,
+  "status": 401,
+  "respuesta": {
+    "error": "Token no proporcionado"
+  }
+}

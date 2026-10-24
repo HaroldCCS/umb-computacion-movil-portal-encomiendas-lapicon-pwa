@@ -1,0 +1,9 @@
+{
+  "endpoint": "GET /api/vuelos/XX9999/2026-12-01",
+  "fecha": "2026-10-22",
+  "body": null,
+  "status": 500,
+  "respuesta": {
+    "error": "RAPIDAPI_KEY no está configurada en el servidor"
+  }
+}

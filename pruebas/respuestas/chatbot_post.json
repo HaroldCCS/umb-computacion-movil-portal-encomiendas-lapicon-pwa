@@ -1,0 +1,17 @@
+{
+  "endpoint": "POST /api/chatbot",
+  "fecha": "2026-10-22",
+  "body": {
+    "mensajeUsuario": "¿Cómo envío un paquete con Lapticon?"
+  },
+  "status": 500,
+  "respuesta": {
+    "error": "Error al generar respuesta con OpenRouter",
+    "detalle": {
+      "error": {
+        "message": "User not found.",
+        "code": 401
+      }
+    }
+  }
+}

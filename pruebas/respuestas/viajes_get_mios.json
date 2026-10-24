@@ -1,0 +1,7 @@
+{
+  "endpoint": "GET /api/viajes",
+  "fecha": "2026-10-22",
+  "body": null,
+  "status": 200,
+  "respuesta": []
+}

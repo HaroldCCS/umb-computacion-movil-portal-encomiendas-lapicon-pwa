@@ -1,0 +1,14 @@
+{
+  "endpoint": "POST /api/viajes",
+  "fecha": "2026-10-22",
+  "body": {
+    "numeroVuelo": "AV12",
+    "ciudadOrigen": "Bogota",
+    "ciudadDestino": "Lima",
+    "fechaViaje": "2026-12-05"
+  },
+  "status": 400,
+  "respuesta": {
+    "error": "Ya tienes un viaje disponible. Debes cerrarlo o cambiar su estado antes de registrar uno nuevo."
+  }
+}

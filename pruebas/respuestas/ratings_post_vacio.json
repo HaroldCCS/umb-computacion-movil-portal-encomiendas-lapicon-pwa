@@ -1,0 +1,9 @@
+{
+  "endpoint": "POST /api/ratings",
+  "fecha": "2026-10-22",
+  "body": {},
+  "status": 500,
+  "respuesta": {
+    "error": "Error interno al guardar calificación"
+  }
+}

@@ -1,0 +1,19 @@
+{
+  "endpoint": "GET /api/viajes/buscar?ciudad=Bogota",
+  "fecha": "2026-10-22",
+  "body": null,
+  "status": 200,
+  "respuesta": [
+    {
+      "_id": "6ad95bc8f8b6da54469cfc4f",
+      "uid": "mdXW0aoFp3dCis7gGvLBzTpHFBy1",
+      "numeroVuelo": "AA123",
+      "ciudadOrigen": "Bogota",
+      "ciudadDestino": "Miami",
+      "fechaViaje": "2026-12-01T00:00:00.000Z",
+      "estado": "disponible",
+      "createdAt": "2026-10-22T00:41:44.670Z",
+      "__v": 0
+    }
+  ]
+}

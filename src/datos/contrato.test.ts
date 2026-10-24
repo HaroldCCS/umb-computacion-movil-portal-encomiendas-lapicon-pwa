@@ -1,5 +1,5 @@
-// Contrato con el backend: las mismas respuestas reales que usa contrato_test.dart
-// (referencias/respuestas/, guardadas el 22-oct-2026).
+// Contrato con el backend: las respuestas reales guardadas el 22-oct-2026
+// (copia de referencias/respuestas/ del repo de documentación, en pruebas/respuestas/).
 import { readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { ClienteApi } from '../core/red/cliente'
@@ -12,7 +12,7 @@ import { usuarioDesdeJson, perfilCompleto } from './modelos/usuario'
 import { cuerpoViaje, viajeDesdeJson } from './modelos/viaje'
 import { crearRepositorios, limpiarLista, parseEstadoChat } from './repositorios'
 
-const DIR = join(__dirname, '../../../referencias/respuestas')
+const DIR = join(__dirname, '../../pruebas/respuestas')
 const respuesta = (archivo: string) =>
   JSON.parse(readFileSync(join(DIR, archivo), 'utf8')) as { status?: number; respuesta: unknown }
 

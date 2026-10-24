@@ -1,0 +1,9 @@
+{
+  "endpoint": "GET /api/viajes/disponible",
+  "fecha": "2026-10-22",
+  "body": null,
+  "status": 404,
+  "respuesta": {
+    "mensaje": "No hay viajes disponibles"
+  }
+}

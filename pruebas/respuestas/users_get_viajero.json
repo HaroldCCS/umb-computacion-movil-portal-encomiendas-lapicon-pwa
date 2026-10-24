@@ -1,0 +1,20 @@
+{
+  "endpoint": "GET /api/users/IeMGfjHQ7XTc0W08QrTzx1flvo13",
+  "fecha": "2026-10-22",
+  "body": null,
+  "status": 200,
+  "respuesta": {
+    "user": {
+      "_id": "6ada5d2f55174b0d3b920bbd",
+      "uid": "IeMGfjHQ7XTc0W08QrTzx1flvo13",
+      "__v": 0,
+      "apellido": "Camargo Viajero",
+      "createdAt": "2026-10-22T18:59:59.384Z",
+      "email": "<oculto>",
+      "nacionalidad": "Colombia",
+      "nombre": "Harold Viajero",
+      "telefono": "<oculto>",
+      "updatedAt": "2026-10-22T19:00:01.700Z"
+    }
+  }
+}

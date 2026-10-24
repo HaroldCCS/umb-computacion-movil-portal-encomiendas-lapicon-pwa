@@ -1,0 +1,27 @@
+{
+  "endpoint": "PUT /api/encomiendas/6ada5d86a4012aeb7e63d853/estado",
+  "fecha": "2026-10-22",
+  "body": {
+    "estado": "recibida"
+  },
+  "status": 200,
+  "respuesta": {
+    "mensaje": "Estado actualizado",
+    "encomienda": {
+      "_id": "6ada5d86a4012aeb7e63d853",
+      "uid": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+      "ciudadOrigen": "Bogota",
+      "ciudadDestino": "Miami",
+      "observaciones": "Prueba Lapticon: libro pequeño",
+      "moneda": "USD",
+      "valor": 15,
+      "estado": "recibida",
+      "viajeroId": "IeMGfjHQ7XTc0W08QrTzx1flvo13",
+      "fechaCreacion": "2026-10-22T19:01:26.915Z",
+      "fechaVencimiento": "2026-11-22T19:01:26.915Z",
+      "fechaDisponibleDesde": "2026-10-22T19:01:26.915Z",
+      "fechaLimiteEntrega": null,
+      "__v": 0
+    }
+  }
+}

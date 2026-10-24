@@ -5,3 +5,4 @@ playwright-report
 test-results
 *.local
 .env.*.local
+.DS_Store

@@ -1,0 +1,22 @@
+{
+  "endpoint": "PUT /api/encomiendas/6ada5d89a4012aeb7e63d85a/estado",
+  "fecha": "2026-10-22",
+  "body": {
+    "estado": "vencida"
+  },
+  "status": 200,
+  "respuesta": {
+    "mensaje": "Estado actualizado",
+    "encomienda": {
+      "_id": "6ada5d89a4012aeb7e63d85a",
+      "uid": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+      "estado": "vencida",
+      "viajeroId": null,
+      "fechaCreacion": "2026-10-22T19:01:29.023Z",
+      "fechaVencimiento": "2026-11-22T19:01:29.023Z",
+      "fechaDisponibleDesde": "2026-10-22T19:01:29.023Z",
+      "fechaLimiteEntrega": null,
+      "__v": 0
+    }
+  }
+}

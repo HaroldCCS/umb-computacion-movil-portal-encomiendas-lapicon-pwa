@@ -1,0 +1,23 @@
+{
+  "endpoint": "PUT /api/users/Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+  "fecha": "2026-10-22",
+  "body": {
+    "rol": "remitente"
+  },
+  "status": 200,
+  "respuesta": {
+    "message": "Usuario actualizado correctamente",
+    "user": {
+      "_id": "6ada5bbe55174b0d3b920bae",
+      "uid": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+      "__v": 0,
+      "apellido": "Camargo",
+      "createdAt": "2026-10-22T18:53:50.787Z",
+      "email": "<oculto>",
+      "nacionalidad": "Colombia",
+      "nombre": "Harold",
+      "telefono": "<oculto>",
+      "updatedAt": "2026-10-22T19:01:11.548Z"
+    }
+  }
+}

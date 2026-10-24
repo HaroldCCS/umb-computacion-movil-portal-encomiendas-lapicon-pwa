@@ -1,0 +1,9 @@
+{
+  "endpoint": "GET /api/chats/estado/Cpmc8Mv0CkTD0aJJMtiOBEzDNV03_e6GUAvw1cFY7VGSwUQkrTPIrAre2",
+  "fecha": "2026-10-22",
+  "body": null,
+  "status": 500,
+  "respuesta": {
+    "error": "Error interno del servidor"
+  }
+}

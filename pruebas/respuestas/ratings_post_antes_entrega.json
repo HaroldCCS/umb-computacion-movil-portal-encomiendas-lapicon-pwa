@@ -1,0 +1,24 @@
+{
+  "endpoint": "POST /api/ratings",
+  "fecha": "2026-10-22",
+  "body": {
+    "usuarioDestino": "IeMGfjHQ7XTc0W08QrTzx1flvo13",
+    "rolDestino": "viajero",
+    "calificacion": 5,
+    "comentario": "Prueba antes de entregar"
+  },
+  "status": 201,
+  "respuesta": {
+    "mensaje": "Calificación guardada",
+    "data": {
+      "usuarioOrigen": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+      "usuarioDestino": "IeMGfjHQ7XTc0W08QrTzx1flvo13",
+      "rolDestino": "viajero",
+      "calificacion": 5,
+      "comentario": "Prueba antes de entregar",
+      "timestamp": "2026-10-22T19:05:39.400Z",
+      "_id": "6ada5e83a4012aeb7e63d87f",
+      "__v": 0
+    }
+  }
+}

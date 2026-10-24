@@ -1,0 +1,61 @@
+# Calidad de la PWA (docs/10 del repo de documentación): tipos, lint, pruebas, build y E2E en celular.
+#
+# No despliega: el despliegue a Cloudflare Pages lo hace Cloudflare al conectar el repositorio
+# (build "npm run build", salida "dist"), o se agrega aquí con un token de Cloudflare como secreto.
+
+name: PWA
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: pwa-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  calidad:
+    name: Tipos, lint, pruebas y build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run lint
+      - run: npm test
+      - run: npm run build
+      - uses: actions/upload-artifact@v6
+        with:
+          name: lapticon-pwa-dist
+          path: dist
+          retention-days: 7
+
+  e2e:
+    name: E2E en celular (iPhone y Android)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: package-lock.json
+      - run: npm ci
+      - run: npx playwright install --with-deps chromium webkit
+      - run: npm run e2e
+      - if: failure()
+        uses: actions/upload-artifact@v6
+        with:
+          name: playwright-report
+          path: test-results
+          retention-days: 7

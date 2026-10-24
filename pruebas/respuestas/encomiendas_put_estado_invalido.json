@@ -1,0 +1,11 @@
+{
+  "endpoint": "PUT /api/encomiendas/6ada5d89a4012aeb7e63d85a/estado",
+  "fecha": "2026-10-22",
+  "body": {
+    "estado": "volando"
+  },
+  "status": 400,
+  "respuesta": {
+    "error": "Estado inválido. Debe ser uno de: disponible, tomada, vencida, entregada, recibida"
+  }
+}

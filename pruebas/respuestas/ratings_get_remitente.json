@@ -1,0 +1,32 @@
+{
+  "endpoint": "GET /api/ratings/Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+  "fecha": "2026-10-22",
+  "body": null,
+  "status": 200,
+  "respuesta": {
+    "total": 2,
+    "promedio": 4.5,
+    "calificaciones": [
+      {
+        "_id": "6ada6186a4012aeb7e63d8cb",
+        "usuarioOrigen": "IeMGfjHQ7XTc0W08QrTzx1flvo13",
+        "usuarioDestino": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+        "rolDestino": "remitente",
+        "calificacion": 5,
+        "comentario": "Amable. Prueba app: todo bien",
+        "timestamp": "2026-10-22T19:18:30.799Z",
+        "__v": 0
+      },
+      {
+        "_id": "6ada5e8ca4012aeb7e63d883",
+        "usuarioOrigen": "IeMGfjHQ7XTc0W08QrTzx1flvo13",
+        "usuarioDestino": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+        "rolDestino": "remitente",
+        "calificacion": 4,
+        "comentario": "Prueba: remitente puntual",
+        "timestamp": "2026-10-22T19:05:48.619Z",
+        "__v": 0
+      }
+    ]
+  }
+}

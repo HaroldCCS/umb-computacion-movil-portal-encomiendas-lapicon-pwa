@@ -1,0 +1,25 @@
+{
+  "endpoint": "POST /api/ratings",
+  "fecha": "2026-10-22",
+  "body": {
+    "usuarioDestino": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+    "rolDestino": "remitente",
+    "calificacion": 4,
+    "comentario": "Prueba: remitente puntual",
+    "encomiendaId": "6ada5d86a4012aeb7e63d853"
+  },
+  "status": 201,
+  "respuesta": {
+    "mensaje": "Calificación guardada",
+    "data": {
+      "usuarioOrigen": "IeMGfjHQ7XTc0W08QrTzx1flvo13",
+      "usuarioDestino": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+      "rolDestino": "remitente",
+      "calificacion": 4,
+      "comentario": "Prueba: remitente puntual",
+      "timestamp": "2026-10-22T19:05:48.619Z",
+      "_id": "6ada5e8ca4012aeb7e63d883",
+      "__v": 0
+    }
+  }
+}

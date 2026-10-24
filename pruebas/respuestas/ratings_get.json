@@ -1,0 +1,9 @@
+{
+  "endpoint": "GET /api/ratings/{uid}",
+  "fecha": "2026-10-22",
+  "respuesta": {
+    "total": 0,
+    "promedio": null,
+    "calificaciones": []
+  }
+}

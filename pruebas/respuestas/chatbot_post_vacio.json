@@ -1,0 +1,9 @@
+{
+  "endpoint": "POST /api/chatbot",
+  "fecha": "2026-10-22",
+  "body": {},
+  "status": 400,
+  "respuesta": {
+    "error": "Mensaje vacío"
+  }
+}

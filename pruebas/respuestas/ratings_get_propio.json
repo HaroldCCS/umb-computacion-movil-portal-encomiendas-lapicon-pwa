@@ -1,0 +1,11 @@
+{
+  "endpoint": "GET /api/ratings/Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+  "fecha": "2026-10-22",
+  "body": null,
+  "status": 200,
+  "respuesta": {
+    "total": 0,
+    "promedio": null,
+    "calificaciones": []
+  }
+}

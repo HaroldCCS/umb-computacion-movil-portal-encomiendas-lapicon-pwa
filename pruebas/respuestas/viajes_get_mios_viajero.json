@@ -1,0 +1,19 @@
+{
+  "endpoint": "GET /api/viajes",
+  "fecha": "2026-10-22",
+  "body": null,
+  "status": 200,
+  "respuesta": [
+    {
+      "_id": "6ada5e75a4012aeb7e63d873",
+      "uid": "IeMGfjHQ7XTc0W08QrTzx1flvo13",
+      "numeroVuelo": "AV10",
+      "ciudadOrigen": "Bogota",
+      "ciudadDestino": "Miami",
+      "fechaViaje": "2026-12-01T00:00:00.000Z",
+      "estado": "disponible",
+      "createdAt": "2026-10-22T19:05:25.373Z",
+      "__v": 0
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "endpoint": "GET /api/encomiendas",
+  "fecha": "2026-10-22",
+  "body": null,
+  "status": 200,
+  "respuesta": [
+    {
+      "_id": "6ada5d89a4012aeb7e63d85a",
+      "uid": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+      "estado": "disponible",
+      "viajeroId": null,
+      "fechaCreacion": "2026-10-22T19:01:29.023Z",
+      "fechaVencimiento": "2026-11-22T19:01:29.023Z",
+      "fechaDisponibleDesde": "2026-10-22T19:01:29.023Z",
+      "fechaLimiteEntrega": null,
+      "__v": 0
+    },
+    {
+      "_id": "6ada5d86a4012aeb7e63d853",
+      "uid": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+      "ciudadOrigen": "Bogota",
+      "ciudadDestino": "Miami",
+      "observaciones": "Prueba Lapticon: libro pequeño",
+      "moneda": "USD",
+      "valor": 15,
+      "estado": "tomada",
+      "viajeroId": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+      "fechaCreacion": "2026-10-22T19:01:26.915Z",
+      "fechaVencimiento": "2026-11-22T19:01:26.915Z",
+      "fechaDisponibleDesde": "2026-10-22T19:01:26.915Z",
+      "fechaLimiteEntrega": null,
+      "__v": 0
+    }
+  ]
+}

@@ -1,0 +1,11 @@
+{
+  "endpoint": "PUT /api/encomiendas/6ad95be0f8b6da54469cfc57/estado",
+  "fecha": "2026-10-22",
+  "body": {
+    "estado": "tomada"
+  },
+  "status": 403,
+  "respuesta": {
+    "error": "No autorizado para modificar esta encomienda"
+  }
+}
