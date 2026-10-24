@@ -1,0 +1,159 @@
+/*
+ * Tokens de Lapticon v2 (docs/07, docs/08 §8.2): los mismos valores que
+ * lapticon_app/lib/core/theme/tema.dart. Es el ÚNICO archivo con colores
+ * directos (una prueba lo vigila); todo lo demás usa estas variables.
+ * Los colores van en canales RGB para poder usarlos con transparencia:
+ * rgb(var(--marca) / 0.5).
+ */
+
+:root {
+  --fondo: 245 246 248;
+  --superficie: 255 255 255;
+  --superficie2: 239 241 245;
+  --separador: 226 230 236;
+  --texto: 17 26 44;
+  --texto2: 92 102 120;
+  --texto3: 142 151 166;
+  --marca: 11 99 196;
+  --marca-solido: 27 42 74;
+  --sobre-marca: 255 255 255;
+  --marca-suave: 228 237 250;
+  --remitente: 242 169 59;
+  --sobre-remitente: 27 42 74;
+  --viajero: 11 99 196;
+  --sobre-viajero: 255 255 255;
+  --exito: 23 102 63;
+  --exito-suave: 222 245 233;
+  --atencion: 138 75 0;
+  --atencion-suave: 254 242 220;
+  --peligro: 198 40 40;
+  --peligro-suave: 253 230 230;
+  --info: 13 71 161;
+  --info-suave: 227 236 250;
+  --sombra-tarjeta: 0 1px 2px rgb(16 24 32 / 0.04), 0 6px 20px rgb(16 24 32 / 0.05);
+  --borde-tarjeta: transparent;
+  --sombra-primario: 0 6px 16px rgb(27 42 74 / 0.25);
+  --sombra-pase: drop-shadow(0 1px 1px rgb(16 24 32 / 0.05)) drop-shadow(0 6px 10px rgb(16 24 32 / 0.06));
+
+  /* Pastel de los íconos en caja (el fondo es el color al 14 %). */
+  --pastel-azul: 59 130 246;
+  --pastel-violeta: 139 92 246;
+  --pastel-ambar: 232 147 12;
+  --pastel-rojo: 229 72 77;
+  --pastel-verde: 30 132 88;
+  --pastel-celeste: 14 165 233;
+
+  /* Tonos de vidrio sobre la tarjeta principal. */
+  --vidrio-menta: 167 243 208;
+  --vidrio-ambar: 253 230 138;
+  --vidrio-celeste: 103 232 249;
+  --blanco: 255 255 255;
+  --negro: 0 0 0;
+
+  /* Degradados de la tarjeta principal (iguales en claro y oscuro). */
+  --degradado-remitente: linear-gradient(150deg, #3a5a8c 0%, #1b2a4a 42%, #0f1a30 100%);
+  --degradado-viajero: linear-gradient(150deg, #1a5fb0 0%, #0b4f9e 42%, #083a75 100%);
+  --sombra-hero-remitente: 0 14px 30px -18px rgb(27 42 74 / 0.45);
+  --sombra-hero-viajero: 0 14px 30px -18px rgb(11 79 158 / 0.45);
+
+  /* Medidas */
+  --margen: 16px;
+  --bloque: 20px;
+  --radio-campo: 16px;
+  --radio-boton: 16px;
+  --radio-tarjeta: 24px;
+  --radio-hero: 28px;
+  --altura-boton: 52px;
+  --altura-boton-icono: 48px;
+  --altura-fila: 52px;
+  --altura-tabbar: 62px;
+  --ancho-maximo: 480px;
+
+  /* Movimiento */
+  --curva-entrada: cubic-bezier(0.22, 1, 0.36, 1);
+  --curva-hoja: cubic-bezier(0.32, 0.72, 0, 1);
+  --rapido: 150ms;
+  --normal: 380ms;
+  --lento: 900ms;
+
+  /* Bordes del iPhone (muesca, indicador de inicio). */
+  --seguro-arriba: env(safe-area-inset-top, 0px);
+  --seguro-abajo: env(safe-area-inset-bottom, 0px);
+  --seguro-izq: env(safe-area-inset-left, 0px);
+  --seguro-der: env(safe-area-inset-right, 0px);
+
+  color-scheme: light;
+}
+
+/* Oscuro: sigue al sistema, salvo que la app fije otro con data-tema. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-tema='claro']) {
+  --fondo: 0 0 0;
+  --superficie: 23 26 32;
+  --superficie2: 37 42 51;
+  --separador: 50 56 68;
+  --texto: 243 245 248;
+  --texto2: 166 174 187;
+  --texto3: 113 122 136;
+  --marca: 140 196 255;
+  --marca-solido: 175 198 255;
+  --sobre-marca: 14 26 51;
+  --marca-suave: 20 40 74;
+  --remitente: 255 197 110;
+  --sobre-remitente: 17 20 27;
+  --viajero: 140 196 255;
+  --sobre-viajero: 0 33 63;
+  --exito: 92 214 150;
+  --exito-suave: 14 54 36;
+  --atencion: 250 190 70;
+  --atencion-suave: 62 42 8;
+  --peligro: 248 120 120;
+  --peligro-suave: 70 22 22;
+  --info: 140 196 255;
+  --info-suave: 20 40 74;
+  --sombra-tarjeta: none;
+  --borde-tarjeta: rgb(var(--separador));
+  --sombra-primario: none;
+  --sombra-pase: none;
+    color-scheme: dark;
+  }
+}
+
+:root[data-tema='oscuro'] {
+  --fondo: 0 0 0;
+  --superficie: 23 26 32;
+  --superficie2: 37 42 51;
+  --separador: 50 56 68;
+  --texto: 243 245 248;
+  --texto2: 166 174 187;
+  --texto3: 113 122 136;
+  --marca: 140 196 255;
+  --marca-solido: 175 198 255;
+  --sobre-marca: 14 26 51;
+  --marca-suave: 20 40 74;
+  --remitente: 255 197 110;
+  --sobre-remitente: 17 20 27;
+  --viajero: 140 196 255;
+  --sobre-viajero: 0 33 63;
+  --exito: 92 214 150;
+  --exito-suave: 14 54 36;
+  --atencion: 250 190 70;
+  --atencion-suave: 62 42 8;
+  --peligro: 248 120 120;
+  --peligro-suave: 70 22 22;
+  --info: 140 196 255;
+  --info-suave: 20 40 74;
+  --sombra-tarjeta: none;
+  --borde-tarjeta: rgb(var(--separador));
+  --sombra-primario: none;
+  --sombra-pase: none;
+  color-scheme: dark;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --rapido: 0ms;
+    --normal: 0ms;
+    --lento: 0ms;
+  }
+}

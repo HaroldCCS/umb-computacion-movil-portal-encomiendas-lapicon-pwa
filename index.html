@@ -11,13 +11,18 @@
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-title" content="Lapticon" />
+    <!-- Barra de estado transparente: el contenido respeta safe-area-inset-top
+         (nada difuminado detrás de la hora y la batería). -->
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="format-detection" content="telephone=no" />
     <link rel="icon" type="image/svg+xml" href="/icono.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
     <title>Lapticon</title>
   </head>
   <body>
     <div id="raiz"></div>
+    <noscript>Lapticon necesita JavaScript para funcionar.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

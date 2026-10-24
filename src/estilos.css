@@ -1,29 +1,273 @@
+/* Space Grotesk autoalojada (CSP 'self' y funciona sin conexión): solo
+   ciudades del pase y cifras grandes. Lo demás, la fuente del sistema. */
+@import '@fontsource/space-grotesk/500.css';
+@import '@fontsource/space-grotesk/700.css';
+@import './core/tema/tokens.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Base móvil (los tokens v2 llegan en la fase 1). */
-:root {
-  color-scheme: light dark;
-  -webkit-text-size-adjust: 100%;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-}
+@layer base {
+  :root {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  }
 
-html,
-body {
-  margin: 0;
-  min-height: 100dvh;
-  background: #f5f6f8;
-  color: #111a2c;
-  /* Sin resaltado gris al tocar ni rebote de toda la página. */
-  -webkit-tap-highlight-color: transparent;
-  overscroll-behavior-y: none;
-}
-
-@media (prefers-color-scheme: dark) {
   html,
   body {
-    background: #000;
-    color: #f3f5f8;
+    margin: 0;
+    min-height: 100dvh;
+    background: rgb(var(--fondo));
+    color: rgb(var(--texto));
+    /* Sin resaltado gris al tocar ni rebote de toda la página. */
+    -webkit-tap-highlight-color: transparent;
+    overscroll-behavior-y: none;
+  }
+
+  /* 16 px mínimo: Safari no hace zoom al enfocar un campo. */
+  input,
+  textarea,
+  select,
+  button {
+    font: inherit;
+    color: inherit;
+  }
+
+  button {
+    cursor: pointer;
+    background: none;
+    border: 0;
+    padding: 0;
+    touch-action: manipulation;
+  }
+
+  :focus-visible {
+    outline: 3px solid rgb(var(--marca));
+    outline-offset: 2px;
+  }
+
+  /* Visible solo para el lector de pantalla. */
+  .solo-lector {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
+@layer components {
+  /* Avatar: el tono sale del nombre (--h); claro y oscuro con el mismo tono. */
+  .avatar {
+    background: hsl(var(--h) 65% 90%);
+    color: hsl(var(--h) 55% 28%);
+  }
+  :root[data-tema='oscuro'] .avatar {
+    background: hsl(var(--h) 30% 24%);
+    color: hsl(var(--h) 70% 78%);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-tema='claro']) .avatar {
+      background: hsl(var(--h) 30% 24%);
+      color: hsl(var(--h) 70% 78%);
+    }
+  }
+
+  /* Respuesta táctil de toda la app (Presionable): una escala corta, sin onda. */
+  .presionable {
+    transition:
+      transform var(--rapido) ease-out,
+      opacity var(--rapido) ease-out;
+    -webkit-user-select: none;
+    user-select: none;
+  }
+  .presionable:not(:disabled):not([aria-disabled='true']):active {
+    transform: scale(var(--escala, 0.97));
+    opacity: 0.85;
+  }
+  .presionable:disabled,
+  .presionable[aria-disabled='true'] {
+    cursor: default;
+  }
+  .presionable.atenuado:disabled,
+  .presionable.atenuado[aria-disabled='true'] {
+    opacity: 0.4;
+  }
+
+  .tarjeta {
+    background: rgb(var(--superficie));
+    border-radius: var(--radio-tarjeta);
+    box-shadow: var(--sombra-tarjeta);
+    border: 1px solid var(--borde-tarjeta);
+  }
+
+  /* Pase de abordar (RouteTicket): muescas con máscara y sombra que sigue la forma. */
+  .pase {
+    background: rgb(var(--superficie));
+    border-radius: var(--radio-tarjeta);
+    border: 1px solid var(--borde-tarjeta);
+  }
+  .con-muescas {
+    -webkit-mask:
+      radial-gradient(circle 10px at 0 var(--muesca-y), transparent 10px, black 10.5px) left / 51% 100% no-repeat,
+      radial-gradient(circle 10px at 100% var(--muesca-y), transparent 10px, black 10.5px) right / 51% 100% no-repeat;
+    mask:
+      radial-gradient(circle 10px at 0 var(--muesca-y), transparent 10px, black 10.5px) left / 51% 100% no-repeat,
+      radial-gradient(circle 10px at 100% var(--muesca-y), transparent 10px, black 10.5px) right / 51% 100% no-repeat;
+  }
+  .sombra-pase {
+    filter: var(--sombra-pase);
+  }
+
+  .cifras {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .display {
+    font-family: 'Space Grotesk', system-ui, sans-serif;
+    font-weight: 700;
+  }
+
+  /* Vidrio de la barra superior y de la barra de pestañas. */
+  .vidrio {
+    background: rgb(var(--fondo) / 0.78);
+    -webkit-backdrop-filter: saturate(180%) blur(20px);
+    backdrop-filter: saturate(180%) blur(20px);
+  }
+
+  .hero-remitente {
+    background-image: var(--degradado-remitente);
+    box-shadow: var(--sombra-hero-remitente);
+  }
+  .hero-viajero {
+    background-image: var(--degradado-viajero);
+    box-shadow: var(--sombra-hero-viajero);
+  }
+  /* Brillo arriba a la izquierda de la tarjeta principal. */
+  .brillo::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: radial-gradient(circle at 0 0, rgb(var(--blanco) / 0.1), rgb(var(--blanco) / 0) 70%);
+    pointer-events: none;
+  }
+}
+
+/* Entrada: fade + 10 px hacia arriba, escalonada con --retraso. */
+@keyframes entrada {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.entrada {
+  animation: entrada var(--normal) var(--curva-entrada) both;
+  animation-delay: var(--retraso, 0ms);
+}
+
+@keyframes brillo-esqueleto {
+  from {
+    background-position: 150% 0;
+  }
+  to {
+    background-position: -50% 0;
+  }
+}
+.esqueleto {
+  background: linear-gradient(90deg, rgb(var(--superficie2)) 25%, rgb(var(--separador)) 50%, rgb(var(--superficie2)) 75%);
+  background-size: 200% 100%;
+  animation: brillo-esqueleto 1.6s linear infinite;
+}
+
+@keyframes caer {
+  from {
+    opacity: 0;
+    transform: translateY(-16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.toast {
+  animation: caer 360ms var(--curva-entrada) both;
+}
+
+@keyframes subir-hoja {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: none;
+  }
+}
+@keyframes aparecer {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.hoja {
+  animation: subir-hoja 420ms var(--curva-hoja) both;
+}
+.velo {
+  animation: aparecer 240ms ease-out both;
+}
+
+@keyframes crecer {
+  from {
+    width: 0;
+  }
+}
+.progreso {
+  animation: crecer var(--lento) ease-out;
+}
+
+@keyframes rebote {
+  from {
+    transform: scale(1.18);
+  }
+  to {
+    transform: scale(1);
+  }
+}
+.rebote {
+  animation: rebote 500ms ease-out;
+}
+
+@keyframes girar {
+  to {
+    transform: rotate(360deg);
+  }
+}
+.girando {
+  animation: girar 0.8s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .entrada,
+  .esqueleto,
+  .toast,
+  .hoja,
+  .velo,
+  .rebote,
+  .progreso {
+    animation: none;
+  }
+  .presionable {
+    transition: none;
   }
 }
