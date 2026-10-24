@@ -1,0 +1,29 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Base móvil (los tokens v2 llegan en la fase 1). */
+:root {
+  color-scheme: light dark;
+  -webkit-text-size-adjust: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100dvh;
+  background: #f5f6f8;
+  color: #111a2c;
+  /* Sin resaltado gris al tocar ni rebote de toda la página. */
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  html,
+  body {
+    background: #000;
+    color: #f3f5f8;
+  }
+}

@@ -1,0 +1,11 @@
+# Cloudflare Pages (docs/10 §10.12). Desplegar con la CLI:
+#   npx wrangler pages deploy dist --project-name lapticon-pwa
+# o conectando el repositorio en el panel (raíz aplicacion_pwa, build
+# "npm run build", salida "dist", Node 22).
+name = "lapticon-pwa"
+compatibility_date = "2026-10-01"
+pages_build_output_dir = "dist"
+
+[vars]
+# Lo usa la función del plan B (functions/api/[[ruta]].js).
+BACKEND_URL = "https://lapticon-backend.onrender.com"

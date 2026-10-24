@@ -1,0 +1,3 @@
+# Rutas del lado del cliente: recargar en /envios o /chat/:uid no debe dar 404.
+# 200 (no 301/302): la URL se queda como estaba y React Router resuelve la ruta.
+/*    /index.html   200

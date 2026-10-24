@@ -1,0 +1,15 @@
+{
+  "name": "Lapticon",
+  "short_name": "Lapticon",
+  "description": "Tu encomienda viaja con alguien que ya va para allá.",
+  "lang": "es",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#F5F6F8",
+  "theme_color": "#1B2A4A",
+  "icons": [
+    { "src": "/icono.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}

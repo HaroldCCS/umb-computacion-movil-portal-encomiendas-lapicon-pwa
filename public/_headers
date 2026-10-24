@@ -1,0 +1,23 @@
+# Cabeceras que Cloudflare Pages aplica a todas las respuestas (docs/10 §10.9).
+
+/*
+  # connect-src: el backend en modo directo, Firebase Auth (identitytoolkit,
+  # securetoken) y Firestore. En modo proxy la API ya es 'self'.
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; img-src 'self' data: blob:; connect-src 'self' https://lapticon-backend.onrender.com https://identitytoolkit.googleapis.com https://securetoken.googleapis.com https://firestore.googleapis.com wss://firestore.googleapis.com; worker-src 'self'; manifest-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+# Los archivos del build llevan hash: se pueden guardar para siempre.
+/assets/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# El HTML nunca se guarda, o un despliegue nuevo no llegaría a quien ya entró.
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+
+/manifest.webmanifest
+  Content-Type: application/manifest+json
+  Cache-Control: public, max-age=3600
