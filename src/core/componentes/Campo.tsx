@@ -202,6 +202,8 @@ export function Campo(p: PropsCampo) {
           <button
             type="button"
             {...{ id, 'aria-invalid': comunes['aria-invalid'], 'aria-describedby': comunes['aria-describedby'] }}
+            // El lector oye la etiqueta Y lo elegido ("Nacionalidad: Colombia").
+            aria-label={`${p.etiqueta}: ${p.valor || p.pista || 'sin elegir'}`}
             onClick={p.alTocar}
             className={`${comunes.className} text-left ${p.valor ? '' : 'text-texto3'}`}
           >

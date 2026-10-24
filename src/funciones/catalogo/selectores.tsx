@@ -93,7 +93,7 @@ function Buscador({
       return (
         <>
           <CampoBusqueda valor={q} alCambiar={setQ} pista={pista} etiqueta={etiqueta} />
-          <div role="listbox" aria-label={etiqueta} className="min-h-0 flex-1 overflow-y-auto overscroll-contain" style={{ paddingBottom: 'calc(20px + var(--seguro-abajo))' }}>
+          <div role="listbox" aria-label="Resultados" className="min-h-0 flex-1 overflow-y-auto overscroll-contain" style={{ paddingBottom: 'calc(20px + var(--seguro-abajo))' }}>
             {filtrados.slice(0, MAXIMO).map((p) => (
               <FilaOpcion key={p} texto={p} icono={icono} seleccionada={p === actual} onClick={() => cerrar(p)} />
             ))}

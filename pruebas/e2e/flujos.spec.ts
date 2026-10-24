@@ -31,6 +31,7 @@ test('cuenta nueva: registro → perfil → rol → inicio vacío', async ({ pag
   await page.goto('/')
   await expect(page).toHaveURL(/\/login$/)
   await page.getByRole('link', { name: 'Crear cuenta' }).click()
+  await expect(page.getByRole('heading', { name: 'Crear cuenta', level: 1 })).toBeVisible()
   await page.getByLabel('Correo').fill('nueva@prueba.co')
   await page.getByLabel('Contraseña', { exact: true }).fill('secreta123')
   await expect(page.getByText('✓ Mínimo 6 caracteres.')).toBeVisible()
@@ -139,8 +140,11 @@ test('de punta a punta: publicar, tomar, entregar y calificar (dos personas)', a
   await ana.getByRole('button', { name: 'Enviar calificación' }).click()
   await expect(ana.getByText('¡Gracias por calificar!').first()).toBeVisible()
   expect(estado.ratings).toEqual([expect.objectContaining({ usuarioDestino: luis, rolDestino: 'viajero', calificacion: 5, comentario: 'Puntual' })])
-  // El contador desaparece (sin ceros).
+  // Vuelve al detalle con la línea de tiempo completa y, en Inicio, el contador desaparece (sin ceros).
+  await expect(ana.getByRole('listitem', { name: 'Calificada: paso actual' })).toBeVisible()
+  await ana.goto('/inicio')
   await expect(ana.getByRole('link', { name: /^Envíos, pestaña/ })).toBeVisible()
+  await expect(ana.getByText(/ya fue entregada/)).toHaveCount(0)
 
   await ctxAna.close()
   await ctxLuis.close()

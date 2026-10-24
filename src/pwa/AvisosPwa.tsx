@@ -102,7 +102,7 @@ export function AvisosPwa() {
       {actualizacion && (
         <div role="status" className="pointer-events-auto flex items-center gap-3 rounded-campo border border-separador bg-superficie px-4 py-2 shadow-tarjeta">
           <RefreshCw aria-hidden size={20} className="shrink-0 text-marca" />
-          <p className="flex-1 text-[15px] text-texto">Hay una versión nueva.</p>
+          <p className="min-w-0 flex-1 text-[15px] text-texto">Hay una versión nueva.</p>
           <Boton chico ancho={false} variante="tonal" onClick={actualizarAhora}>
             Actualizar
           </Boton>
@@ -111,7 +111,7 @@ export function AvisosPwa() {
       {invitar && (
         <div role="status" className="pointer-events-auto flex items-center gap-3 rounded-campo border border-separador bg-superficie py-2 pl-4 pr-1 shadow-tarjeta">
           <Download aria-hidden size={20} className="shrink-0 text-marca" />
-          <p className="flex-1 text-[15px] text-texto">Instala Lapticon y ábrela desde tu pantalla de inicio.</p>
+          <p className="min-w-0 flex-1 text-[15px] text-texto">Instala Lapticon y ábrela desde tu pantalla de inicio.</p>
           <Boton
             chico
             ancho={false}

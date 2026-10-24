@@ -12,7 +12,10 @@ const PANTALLAS_REMITENTE = ['/inicio', '/envios', '/envios?pestana=entregadas',
 const PANTALLAS_VIAJERO = ['/mi-viaje', '/explorar', '/viajero/registrar']
 
 for (const [nombre, opciones] of [
-  ['360 px, letra al 200 %', { viewport: { width: 360, height: 740 }, letra: 2 }],
+  // Criterio WCAG 1.4.10 (reflujo): 200 % sobre 640 px = 320 px efectivos, el
+  // teléfono más angosto. (200 % sobre 360 px serían 180 px: no cabe ninguna app.)
+  ['320 px efectivos con letra al 200 %', { viewport: { width: 640, height: 1480 }, letra: 2 }],
+  ['320 px', { viewport: { width: 320, height: 640 }, letra: 1 }],
   ['modo oscuro', { colorScheme: 'dark' as const, letra: 1 }],
 ] as const) {
   test.describe(nombre, () => {
@@ -43,7 +46,7 @@ for (const [nombre, opciones] of [
       await expect(page).toHaveURL(/\/inicio$/)
       for (const ruta of PANTALLAS_REMITENTE) {
         await page.goto(ruta)
-        await page.getByRole('heading').first().waitFor()
+        await page.locator('main').first().waitFor()
         await page.waitForLoadState('networkidle')
         expect(await sinDesborde(page), `desborde en ${ruta}`).toBe(true)
       }
@@ -55,7 +58,7 @@ for (const [nombre, opciones] of [
       await expect(page).toHaveURL(/\/mi-viaje$/)
       for (const ruta of PANTALLAS_VIAJERO) {
         await page.goto(ruta)
-        await page.getByRole('heading').first().waitFor()
+        await page.locator('main').first().waitFor()
         await page.waitForLoadState('networkidle')
         expect(await sinDesborde(page), `desborde en ${ruta}`).toBe(true)
       }

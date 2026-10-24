@@ -34,7 +34,7 @@ export function BarraPestanas({
       style={{ paddingBottom: 'calc(var(--seguro-abajo) + 8px)' }}
     >
       <ul
-        className="vidrio flex h-[62px] flex-1 items-stretch rounded-full border border-separador p-1.5"
+        className="vidrio flex h-[62px] min-w-0 flex-1 items-stretch rounded-full border border-separador p-1.5"
         style={{ background: 'rgb(var(--superficie) / 0.86)' }}
       >
         {items.map((it, i) => {
@@ -42,13 +42,13 @@ export function BarraPestanas({
           const contador = it.contador ?? 0
           const p = presionable(0.9)
           return (
-            <li key={it.ruta} className="flex flex-1">
+            <li key={it.ruta} className="flex min-w-0 flex-1">
               <NavLink
                 to={it.ruta}
                 replace
                 aria-label={`${it.texto}${contador > 0 ? `, ${it.etiquetaContador ?? `${contador} pendientes`}` : ''}, pestaña ${i + 1} de ${items.length}`}
                 className={({ isActive }) =>
-                  `${p.className} flex flex-1 flex-col items-center justify-center rounded-full transition-colors duration-200 ${
+                  `${p.className} flex min-w-0 flex-1 flex-col items-center justify-center rounded-full transition-colors duration-200 ${
                     isActive ? 'bg-marca-suave text-marca' : 'text-texto2'
                   }`
                 }

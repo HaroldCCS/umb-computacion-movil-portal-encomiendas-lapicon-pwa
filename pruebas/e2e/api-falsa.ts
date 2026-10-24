@@ -260,9 +260,12 @@ export async function instalarApiFalsa(destino: Page | BrowserContext, estado: E
 /** Entra con la identidad falsa (cualquier contraseña de 6+ caracteres). */
 export async function entrar(page: Page, email: string, password = 'secreta123') {
   await page.goto('/login')
+  await page.getByRole('button', { name: 'Iniciar sesión' }).waitFor()
   await page.getByLabel('Correo').fill(email)
   await page.getByLabel('Contraseña', { exact: true }).fill(password)
   await page.getByRole('button', { name: 'Iniciar sesión' }).click()
+  // La sesión queda lista cuando la app sale del login (o muestra el error).
+  if (password !== 'incorrecta') await page.waitForURL((u) => !u.pathname.startsWith('/login'))
 }
 
 /** Deja el rol elegido en el dispositivo (como si ya lo hubiera escogido). */
