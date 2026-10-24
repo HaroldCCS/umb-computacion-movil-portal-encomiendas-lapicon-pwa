@@ -273,7 +273,27 @@ export async function conRol(destino: Page | BrowserContext, email: string, rol:
   await destino.addInitScript(([clave, valor]) => localStorage.setItem(clave!, valor!), [`rol_${uidDe(email)}`, rol])
 }
 
-/** Sin scroll horizontal: nada se sale del ancho del teléfono. */
-export async function sinDesborde(page: Page) {
-  return page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth + 1)
+/** Sin scroll horizontal: nada se sale del ancho del teléfono. Si algo se sale,
+ *  devuelve qué es (para que el error de CI lo diga). */
+export async function sinDesborde(page: Page): Promise<true | string> {
+  return page.evaluate(() => {
+    // innerWidth: el ancho de la pantalla. Se mira cada elemento y no scrollWidth,
+    // que en Linux con zoom suma la barra de scroll que los teléfonos no dibujan.
+    const w = window.innerWidth
+    const culpables: string[] = []
+    // Lo que está dentro de algo con scroll propio o recortado (la fila de chips) no cuenta.
+    const recortado = (el: HTMLElement) => {
+      for (let p = el.parentElement; p && p !== document.body; p = p.parentElement) {
+        if (getComputedStyle(p).overflowX !== 'visible') return true
+      }
+      return false
+    }
+    for (const el of document.querySelectorAll<HTMLElement>('body *')) {
+      const r = el.getBoundingClientRect()
+      if (r.width > 0 && r.right > w + 1 && !recortado(el)) {
+        culpables.push(`${el.tagName}.${String(el.className).slice(0, 50)} "${el.textContent?.trim().slice(0, 30)}" (${Math.round(r.right)}px)`)
+      }
+    }
+    return culpables.length === 0 ? (true as const) : culpables.slice(0, 5).join(' | ')
+  })
 }

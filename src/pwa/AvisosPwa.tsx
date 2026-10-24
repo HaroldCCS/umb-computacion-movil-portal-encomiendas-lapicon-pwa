@@ -109,28 +109,33 @@ export function AvisosPwa() {
         </div>
       )}
       {invitar && (
-        <div role="status" className="pointer-events-auto flex items-center gap-3 rounded-campo border border-separador bg-superficie py-2 pl-4 pr-1 shadow-tarjeta">
-          <Download aria-hidden size={20} className="shrink-0 text-marca" />
-          <p className="min-w-0 flex-1 text-[15px] text-texto">Instala Lapticon y ábrela desde tu pantalla de inicio.</p>
-          <Boton
-            chico
-            ancho={false}
-            variante="tonal"
-            onClick={() => {
-              descartar()
-              void instalar.abrir()
-            }}
-          >
-            Instalar
-          </Boton>
-          <button
-            type="button"
-            aria-label="Ahora no"
-            onClick={descartar}
-            className="grid size-12 shrink-0 place-items-center text-texto2"
-          >
-            <X aria-hidden size={20} />
-          </button>
+        // Con poco espacio (letra grande) los botones bajan debajo del texto.
+        <div role="status" className="pointer-events-auto flex flex-wrap items-center gap-x-3 rounded-campo border border-separador bg-superficie py-2 pl-4 pr-1 shadow-tarjeta">
+          <p className="flex min-w-0 flex-[1_1_12rem] items-center gap-3 text-[15px] text-texto">
+            <Download aria-hidden size={20} className="shrink-0 text-marca" />
+            <span className="min-w-0">Instala Lapticon y ábrela desde tu pantalla de inicio.</span>
+          </p>
+          <span className="ml-auto flex items-center">
+            <Boton
+              chico
+              ancho={false}
+              variante="tonal"
+              onClick={() => {
+                descartar()
+                void instalar.abrir()
+              }}
+            >
+              Instalar
+            </Boton>
+            <button
+              type="button"
+              aria-label="Ahora no"
+              onClick={descartar}
+              className="grid size-12 shrink-0 place-items-center text-texto2"
+            >
+              <X aria-hidden size={20} />
+            </button>
+          </span>
         </div>
       )}
     </div>
