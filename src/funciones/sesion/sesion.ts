@@ -40,7 +40,14 @@ export class Sesion {
     private readonly auth: ServicioAuth,
     private readonly usuarios: Repositorios['usuarios'],
   ) {
-    this.baja = auth.alCambiar((u) => void this.alCambiarUsuario(u))
+    try {
+      this.baja = auth.alCambiar((u) => void this.alCambiarUsuario(u))
+    } catch (e) {
+      // Firebase no pudo iniciar (p. ej. falta la clave en el build): se muestra
+      // el error en el splash en vez de dejar la pantalla en blanco.
+      this.baja = () => {}
+      this.s = { ...this.s, estado: 'error', error: mensajeDe(e, 'No pudimos iniciar la app. Intenta de nuevo.') }
+    }
   }
 
   get instantanea(): InstantaneaSesion {

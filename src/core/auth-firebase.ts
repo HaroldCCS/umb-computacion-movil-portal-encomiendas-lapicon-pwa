@@ -9,18 +9,27 @@ import {
   signOut,
   type Auth,
 } from 'firebase/auth'
-import { errorAuth, type ServicioAuth, type UsuarioAuth } from './auth'
-import { appFirebase } from './firebase'
+import { AuthError, errorAuth, mensajeAuth, type ServicioAuth, type UsuarioAuth } from './auth'
+import { appFirebase, hayConfigFirebase } from './firebase'
 
 let auth: Auth | null = null
 
+/** Sin clave (o con una inválida) Firebase lanza al iniciar: se convierte en un
+ *  AuthError con mensaje humano para que la app lo muestre en vez de quedar en blanco. */
 function obtenerAuth(): Auth {
+  if (!hayConfigFirebase) {
+    throw new AuthError(mensajeAuth('auth/invalid-api-key'), 'invalid-api-key')
+  }
   if (!auth) {
     // Sin el resolvedor de ventanas emergentes: solo correo y contraseña, así
     // no se carga el iframe de Google ni hace falta abrir la CSP.
-    auth = initializeAuth(appFirebase(), {
-      persistence: [indexedDBLocalPersistence, browserLocalPersistence],
-    })
+    try {
+      auth = initializeAuth(appFirebase(), {
+        persistence: [indexedDBLocalPersistence, browserLocalPersistence],
+      })
+    } catch (e) {
+      throw errorAuth(e)
+    }
     auth.languageCode = 'es'
   }
   return auth

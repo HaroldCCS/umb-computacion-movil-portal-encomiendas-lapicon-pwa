@@ -9,7 +9,9 @@
  * Cloudflare no cuenta como CPU el tiempo esperando la respuesta, así que el
  * arranque en frío de Render (~60 s) no corta la petición.
  *
- * Variable en Cloudflare Pages (o en wrangler.toml): BACKEND_URL, sin /api al final.
+ * Variable opcional en Cloudflare Pages: BACKEND_URL, sin /api al final (si falta, usa RESPALDO).
+ * No hay wrangler.toml a propósito: con él, Cloudflare ignora las variables del panel
+ * (entre ellas VITE_FIREBASE_API_KEY, que el build necesita).
  */
 const RESPALDO = 'https://lapticon-backend.onrender.com'
 

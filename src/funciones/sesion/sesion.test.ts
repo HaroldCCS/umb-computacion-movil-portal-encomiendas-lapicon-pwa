@@ -1,5 +1,5 @@
 // Máquina de estados de la sesión (port de session_controller.dart).
-import type { ServicioAuth, UsuarioAuth } from '../../core/auth'
+import { AuthError, type ServicioAuth, type UsuarioAuth } from '../../core/auth'
 import { ApiError, RedError } from '../../core/red/errores'
 import type { Usuario } from '../../datos/modelos/usuario'
 import type { Repositorios } from '../../datos/repositorios'
@@ -97,5 +97,15 @@ describe('Sesion', () => {
     await entrar()
     await sesion.cerrarSesion()
     expect(sesion.obtener()).toMatchObject({ estado: 'sinSesion', perfil: null, rol: null, usuario: null })
+  })
+
+  it('si Firebase no puede iniciar (falta la clave) queda en error con mensaje, no en blanco', () => {
+    const auth = {
+      alCambiar: () => {
+        throw new AuthError('Falta configurar Firebase en esta versión de la app.', 'invalid-api-key')
+      },
+    } as unknown as ServicioAuth
+    const sesion = new Sesion(auth, {} as Repositorios['usuarios'])
+    expect(sesion.obtener()).toMatchObject({ estado: 'error', error: 'Falta configurar Firebase en esta versión de la app.' })
   })
 })

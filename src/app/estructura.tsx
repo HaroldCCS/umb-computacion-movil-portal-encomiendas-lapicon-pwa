@@ -36,9 +36,10 @@ export function Splash() {
         <div className="w-full">
           <ErrorCarga
             mensaje={s.error ?? 'Intenta de nuevo.'}
-            alReintentar={() => void s.control.recargar()}
-            textoSecundario="Cerrar sesión"
-            alSecundario={() => void s.control.cerrarSesion()}
+            // Sin usuario no hay perfil que recargar: el error fue al iniciar, se recarga la app.
+            alReintentar={() => (s.usuario ? void s.control.recargar() : window.location.reload())}
+            textoSecundario={s.usuario ? 'Cerrar sesión' : undefined}
+            alSecundario={s.usuario ? () => void s.control.cerrarSesion() : undefined}
           />
         </div>
       </main>

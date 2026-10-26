@@ -11,8 +11,8 @@ Documentación (contrato de la API, sistema de diseño v2, plan de la PWA, bitá
 **Organización local:** este repositorio se clona dentro de la carpeta del repo de documentación, como
 `aplicacion_pwa/` (el de documentación lo ignora). Así `../referencias/google-services.json` queda a la mano.
 
-**Estado (24-oct-2026):** migración completa (fases 0–8 y pruebas de la 9). Falta el despliegue en Cloudflare Pages y
-la prueba en un celular real con las cuentas de verdad (ver "Pendiente").
+**Estado (26-oct-2026):** migración completa y desplegada en https://lapticon.haroldsoftware.com. Falta la prueba en un
+celular real con las cuentas de verdad (ver "Pendiente").
 
 ## Requisitos
 
@@ -87,18 +87,21 @@ a la URL del backend. Para comprobarlo:
 curl -sI -H "Origin: https://lapticon-pwa.pages.dev" https://lapticon-backend.onrender.com/api/ciudades/paises | grep -i access-control-allow-origin
 ```
 
-## Desplegar en Cloudflare Pages (una vez, con tu cuenta)
+## Despliegue en Cloudflare Pages
 
-1. Cloudflare → *Workers & Pages* → *Create* → *Pages* → *Connect to Git* → este repositorio.
-2. Proyecto **`lapticon-pwa`** (si está ocupado, anota el nombre: es el origen que se le pide al profesor).
-3. *Framework preset*: ninguno. *Build command*: `npm run build`. *Build output*: `dist`. *Root directory*: vacío (la raíz).
-4. *Environment variables*: `NODE_VERSION = 22`, `BACKEND_URL = https://lapticon-backend.onrender.com` y
-   **`VITE_FIREBASE_API_KEY`** (la misma de `.env.local`; sin ella la app abre pero no deja iniciar sesión).
-5. Guardar y desplegar. La carpeta `functions/` se publica sola como la función del proxy.
+Desplegada en **https://lapticon.haroldsoftware.com** (también `https://lapticon-pwa.pages.dev`), proyecto
+`lapticon-pwa` conectado a este repositorio: cada push a `main` construye y publica solo.
 
-Alternativa por terminal: `npx wrangler login` y `npm run build && npx wrangler pages deploy dist --project-name lapticon-pwa`.
+Configuración del proyecto (panel → Workers & Pages → lapticon-pwa → Settings):
+- Build command `npm run build`, output `dist`, root vacío. Node 22 sale de `.node-version`.
+- Variable **`VITE_FIREBASE_API_KEY`** (la de `.env.local`). Sin ella la app abre y muestra
+  "Falta configurar Firebase en esta versión de la app."
+- `BACKEND_URL` es opcional: la función del proxy (`functions/api/[[ruta]].js`) usa Render si falta.
 
-Después: `npm run humo -- https://lapticon-pwa.pages.dev` comprueba los endpoints a través del proxy desplegado.
+**No hay `wrangler.toml` a propósito:** si existe con `pages_build_output_dir`, Cloudflare toma la configuración del
+archivo e ignora las variables del panel (así se perdió la clave en el primer despliegue).
+
+Comprobar el despliegue: `npm run humo -- https://lapticon.haroldsoftware.com`.
 
 ## Pruebas
 
@@ -114,7 +117,7 @@ Después: `npm run humo -- https://lapticon-pwa.pages.dev` comprueba los endpoin
 
 ## Pendiente
 
-- Desplegar en Cloudflare Pages y probar instalada en iPhone y Android con las cuentas reales.
+- Probar instalada en iPhone y Android con las cuentas reales.
 - Probar el chat PWA ↔ Flutter en ambos sentidos (mismo esquema; no se ha visto en vivo).
 - Lighthouse móvil sobre la URL desplegada.
 

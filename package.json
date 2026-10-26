@@ -12,7 +12,7 @@
     "dev:directo": "vite --mode directo",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "proxy:local": "npm run build && wrangler pages dev dist --port 8788",
+    "proxy:local": "npm run build && wrangler pages dev dist --port 8788 --compatibility-date=2026-10-01",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
