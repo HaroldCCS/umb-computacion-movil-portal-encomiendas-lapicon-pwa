@@ -19,7 +19,7 @@ import { conEstado, type Encomienda } from '../../datos/modelos/encomienda'
 import { esFinalizada } from '../../datos/modelos/estado'
 import type { ArgsCalificar } from '../calificaciones/pantallas'
 import type { ArgsChat } from '../chat/ChatPantalla'
-import { FilaConfianza, LineaTiempo, TicketEnvio, useEncomiendaDeRuta, useNuevasTomadas } from './componentes'
+import { FilaConfianza, LineaTiempo, TicketEnvio, useEncomiendaDeRuta, useNuevasTomadas, ViajerosSugeridos } from './componentes'
 
 /**
  * Detalle de una encomienda del remitente. La acción principal va fija abajo;
@@ -179,6 +179,7 @@ function Detalle({ inicial }: { inicial: Encomienda }) {
           <LineaTiempo estado={e.estado} calificada={calificada} />
         </div>
       </Grupo>
+      {e.estado === 'disponible' && <ViajerosSugeridos e={e} />}
       <Grupo titulo="Detalles">
         <Fila etiqueta="Pago al viajero" valor={<Monto valor={e.valor} moneda={e.moneda} />} extra="Lo que ofreciste por llevarla." />
         <Fila etiqueta="Publicada" valor={Fmt.fecha(e.creadaEn)} />

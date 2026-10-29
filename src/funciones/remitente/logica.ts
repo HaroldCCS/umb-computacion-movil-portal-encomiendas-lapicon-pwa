@@ -173,3 +173,30 @@ export async function conNombresDeViajeros(
     e.viajeroUid && !e.viajeroNombre && nombres.has(e.viajeroUid) ? { ...e, viajeroNombre: nombres.get(e.viajeroUid)! } : e,
   )
 }
+
+/** Una sugerencia lista para mostrar: con nombre si `viajes/disponibles` lo da. */
+export interface SugerenciaViajero {
+  viajeroUid: string
+  nombre: string | null
+  afinidad: number
+  fechaViaje: Date | null
+}
+
+/**
+ * Viajeros sugeridos para una encomienda: sin el propio remitente (puede tener un viaje en esa
+ * ruta), uno por viajero, los de más afinidad primero y como mucho `max`.
+ */
+export function sugerenciasParaMostrar(
+  sugeridos: { viajeroUid: string; afinidad: number; fechaViaje: Date | null }[],
+  viajeros: { viajeroUid: string | null; viajeroNombre: string | null }[],
+  miUid: string | null,
+  max = 3,
+): SugerenciaViajero[] {
+  const nombres = new Map(viajeros.filter((v) => v.viajeroUid).map((v) => [v.viajeroUid!, v.viajeroNombre]))
+  const vistos = new Set<string>()
+  return [...sugeridos]
+    .sort((a, b) => b.afinidad - a.afinidad)
+    .filter((s) => s.viajeroUid !== miUid && !vistos.has(s.viajeroUid) && vistos.add(s.viajeroUid))
+    .slice(0, max)
+    .map((s) => ({ ...s, nombre: nombres.get(s.viajeroUid) ?? null }))
+}

@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useLocal, useRepos, useUid } from '../app/contexto'
 import { AppError } from '../core/red/errores'
-import { conNombresDeViajeros } from '../funciones/remitente/logica'
+import { conNombresDeViajeros, sugerenciasParaMostrar, type SugerenciaViajero } from '../funciones/remitente/logica'
 import { combinarEntregas, paraTomar } from '../funciones/viajero/logica'
 import { Local } from './local'
 import type { Encomienda } from './modelos/encomienda'
@@ -107,6 +107,37 @@ export function useDisponiblesEnMiRuta() {
     enabled: uid !== null && viaje.isSuccess,
     staleTime: 5_000,
     select: (r: BusquedaEncomiendas) => paraTomar(r.disponibles, uid),
+  })
+}
+
+/** Si la IA no responde en este tiempo, la pantalla sigue sin sugerencias (una vez tardó más de 120 s). */
+export const ESPERA_SUGERENCIAS_MS = 15_000
+
+/** Viajeros sugeridos por IA para una encomienda disponible (docs/11 §2F), con su nombre cuando
+ *  `viajes/disponibles` lo da. Nunca bloquea: con error o demora, la consulta falla sola. */
+export function useViajerosSugeridos(e: Encomienda | null) {
+  const repos = useRepos()
+  const uid = useUid()
+  return useQuery({
+    queryKey: ['sugeridos', e?.id],
+    enabled: e !== null && e.estado === 'disponible',
+    retry: false,
+    staleTime: 60_000,
+    queryFn: async (): Promise<SugerenciaViajero[]> => {
+      const pedido = repos.encomiendas.emparejar({
+        ciudadOrigen: e!.ciudadOrigen,
+        ciudadDestino: e!.ciudadDestino,
+        fecha: e!.fechaVencimiento ?? new Date(),
+        valor: e!.valor,
+      })
+      let reloj: ReturnType<typeof setTimeout> | undefined
+      const espera = new Promise<never>((_, rechazar) => {
+        reloj = setTimeout(() => rechazar(new Error('Las sugerencias tardaron demasiado.')), ESPERA_SUGERENCIAS_MS)
+      })
+      const sugeridos = await Promise.race([pedido, espera]).finally(() => clearTimeout(reloj))
+      const viajeros = await repos.viajes.disponiblesEnRuta(e!.ciudadOrigen, e!.ciudadDestino).catch(() => [])
+      return sugerenciasParaMostrar(sugeridos, viajeros, uid)
+    },
   })
 }
 

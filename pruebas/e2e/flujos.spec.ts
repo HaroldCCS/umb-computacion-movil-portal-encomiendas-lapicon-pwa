@@ -326,6 +326,31 @@ test('remitente: viajeros de su ruta con nombre y nombre del viajero en sus env�
   await expect(page.getByText('Luis Pérez aceptó llevarla. Coordinen por chat dónde y cuándo se la entregas.')).toBeVisible()
 })
 
+test('remitente: viajeros sugeridos por IA en una encomienda disponible', async ({ page }) => {
+  const estado = crearEstado()
+  const ana = sembrarUsuario(estado, 'ana@prueba.co', 'Ana')
+  const luis = sembrarUsuario(estado, 'luis@prueba.co', 'Luis', 'Pérez')
+  sembrarViaje(estado, { uid: luis })
+  sembrarViaje(estado, { uid: ana }) // su propio viaje en la ruta no se sugiere
+  const e = sembrarEncomienda(estado, { uid: ana })
+  await instalarApiFalsa(page, estado)
+  await conRol(page, 'ana@prueba.co', 'remitente')
+  await entrar(page, 'ana@prueba.co')
+  await page.goto(`/remitente/encomienda/${e._id}`)
+  await expect(page.getByRole('heading', { name: 'Viajeros sugeridos' })).toBeVisible()
+  await expect(page.getByRole('group', { name: /^Viajero: Luis Pérez/ })).toBeVisible()
+  await expect(page.getByText(/Afinidad \d+ %/)).toHaveCount(1)
+  await page.getByRole('button', { name: 'Escribirle' }).click()
+  await expect(page).toHaveURL(new RegExp(`/chat/${luis}$`))
+
+  // Si la IA falla, el detalle sigue funcionando y se puede reintentar.
+  estado.emparejarFalla = true
+  const otra = sembrarEncomienda(estado, { uid: ana, ciudadDestino: 'Lima' })
+  await page.goto(`/remitente/encomienda/${otra._id}`)
+  await expect(page.getByText('No pudimos traer sugerencias ahora. Tu encomienda sigue publicada.')).toBeVisible()
+  await expect(page.getByRole('button', { name: 'Retirar encomienda' })).toBeVisible()
+})
+
 test('chat cerrado: al marcarla entregada se bloquea y dice desde cuándo', async ({ page }) => {
   const estado = crearEstado()
   const ana = sembrarUsuario(estado, 'ana@prueba.co', 'Ana')

@@ -12,6 +12,7 @@ import {
   actualizarVistos,
   agruparEnvios,
   conNombresDeViajeros,
+  sugerenciasParaMostrar,
   nuevasTomadas,
   formatearMiles,
   parseValor,
@@ -158,6 +159,27 @@ describe('remitente', () => {
     expect(pedidos).toHaveLength(1)
     const sinRed = await conNombresDeViajeros(lista, () => Promise.reject(new Error('sin red')))
     expect(sinRed.map((x) => x.viajeroNombre)).toEqual([null, null, null])
+  })
+
+  it('sugerenciasParaMostrar: sin mí, sin repetir, por afinidad y con nombre', () => {
+    const f = new Date(2026, 11, 1)
+    const r = sugerenciasParaMostrar(
+      [
+        { viajeroUid: 'a', afinidad: 0.5, fechaViaje: f },
+        { viajeroUid: 'yo', afinidad: 0.99, fechaViaje: f },
+        { viajeroUid: 'b', afinidad: 0.9, fechaViaje: f },
+        { viajeroUid: 'b', afinidad: 0.8, fechaViaje: f },
+        { viajeroUid: 'c', afinidad: 0.7, fechaViaje: f },
+        { viajeroUid: 'd', afinidad: 0.1, fechaViaje: f },
+      ],
+      [{ viajeroUid: 'b', viajeroNombre: 'Luis Pérez' }],
+      'yo',
+    )
+    expect(r.map((x) => [x.viajeroUid, x.nombre])).toEqual([
+      ['b', 'Luis Pérez'],
+      ['c', null],
+      ['a', null],
+    ])
   })
 
   it('conEstado conserva los demás datos', () => {

@@ -14,6 +14,15 @@ import { fechaIso } from '../../core/formato'
  * Repositorios = contrato de la API (docs/03), port de lib/data/repositories.
  * Las pantallas usan estos métodos; nunca `fetch` ni el cliente directo.
  */
+/** Un viaje sugerido por `POST /api/encomiendas/emparejar-viajes` (sin nombre del viajero). */
+export interface ViajeSugerido {
+  viajeId: string
+  viajeroUid: string
+  /** 0 a 1. */
+  afinidad: number
+  fechaViaje: Date | null
+}
+
 /** Respuesta de `GET /api/encomiendas/buscar`. */
 export interface BusquedaEncomiendas {
   disponibles: Encomienda[]
@@ -122,6 +131,27 @@ export function crearRepositorios(api: ClienteApi) {
       const json = await api.get('/api/encomiendas/buscar', { query: { origen, destino } })
       const m = esMapa(json) ? json : {}
       return { disponibles: listaEncomiendas(m['disponibles'] ?? []), tomadas: listaEncomiendas(m['tomadas'] ?? []) }
+    },
+    /** Viajes sugeridos por IA para una encomienda (`POST /api/encomiendas/emparejar-viajes`, docs/11 §2F).
+     *  Una vez tardó más de 120 s: quien la use le pone su propio tiempo de espera. */
+    async emparejar(d: { ciudadOrigen: string; ciudadDestino: string; fecha: Date; valor: number }): Promise<ViajeSugerido[]> {
+      const json = await api.post('/api/encomiendas/emparejar-viajes', {
+        cuerpo: {
+          ciudadOrigen: d.ciudadOrigen,
+          ciudadDestino: d.ciudadDestino,
+          fechaEncomienda: fechaIso(d.fecha),
+          valorEncomienda: d.valor,
+        },
+      })
+      return desenvolverLista(json, ['viajes', 'sugerencias', 'data'])
+        .filter(esMapa)
+        .map((m) => ({
+          viajeId: leerTexto(m, ['viajeId', '_id', 'id']),
+          viajeroUid: leerTexto(m, ['uid', 'viajeroUid']),
+          afinidad: typeof m['afinidad'] === 'number' ? Math.min(1, Math.max(0, m['afinidad'])) : 0,
+          fechaViaje: leerFecha(m, ['fechaViaje']),
+        }))
+        .filter((v) => v.viajeroUid !== '')
     },
     /** `POST /api/encomiendas`. */
     crear: async (d: Parameters<typeof cuerpoEncomienda>[0]): Promise<Encomienda> =>

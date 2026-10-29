@@ -54,6 +54,8 @@ export interface EstadoApi {
   ratings: RatingApi[]
   /** Peticiones recibidas ("GET /api/…"), para comprobar qué se llamó. */
   llamadas: string[]
+  /** Simula que la IA del backend falla (`emparejar-viajes` → 500). */
+  emparejarFalla?: boolean
   /** Simula el arranque lento de Render (ms). */
   demora: number
 }
@@ -196,6 +198,16 @@ async function responder(estado: EstadoApi, route: Route) {
   if (metodo === 'POST' && ruta === '/api/encomiendas') {
     const e = sembrarEncomienda(estado, { uid: yo!, ...(cuerpo as Partial<EncomiendaApi>), fechaCreacion: hace(0) })
     return json(201, e)
+  }
+  if (metodo === 'POST' && ruta === '/api/encomiendas/emparejar-viajes') {
+    // Como el real: viajes disponibles de la ruta con su afinidad, sin nombre.
+    if (estado.emparejarFalla) return json(500, { error: 'Error al consultar el emparejamiento' })
+    return json(
+      200,
+      estado.viajes
+        .filter((v) => v.estado === 'disponible' && v.ciudadOrigen === cuerpo['ciudadOrigen'] && v.ciudadDestino === cuerpo['ciudadDestino'])
+        .map((v, i) => ({ viajeId: v._id, uid: v.uid, afinidad: 0.9 - i * 0.1, ciudadOrigen: v.ciudadOrigen, ciudadDestino: v.ciudadDestino, fechaViaje: v.fechaViaje })),
+    )
   }
   if (metodo === 'PUT' && (x = m(/^\/api\/encomiendas\/tomar\/([^/]+)$/))) {
     const e = estado.encomiendas.find((y) => y._id === x![1])

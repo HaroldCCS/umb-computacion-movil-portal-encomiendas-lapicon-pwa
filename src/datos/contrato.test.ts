@@ -192,6 +192,23 @@ describe('repositorios (endpoints de la matriz §10.5)', () => {
     expect(paraTomar(propia.disponibles, 'Cpmc8Mv0CkTD0aJJMtiOBEzDNV03')).toEqual([])
   })
 
+  it('emparejar-viajes: viajes sugeridos con afinidad, sin nombre', async () => {
+    const { r, llamadas } = repos({
+      'POST /api/encomiendas/emparejar-viajes': [200, respuesta('fase0_emparejar_viajes.json').respuesta],
+    })
+    const s = await r.encomiendas.emparejar({ ciudadOrigen: 'Bogota', ciudadDestino: 'Miami', fecha: new Date(2026, 10, 30), valor: 20 })
+    expect(s.map((x) => [x.viajeroUid, x.afinidad])).toEqual([
+      ['mdXW0aoFp3dCis7gGvLBzTpHFBy1', 0.868],
+      ['IeMGfjHQ7XTc0W08QrTzx1flvo13', 0.868],
+    ])
+    expect(JSON.parse(String(llamadas[0]!.init.body))).toEqual({
+      ciudadOrigen: 'Bogota',
+      ciudadDestino: 'Miami',
+      fechaEncomienda: '2026-11-30',
+      valorEncomienda: 20,
+    })
+  })
+
   it('cancelar viaje: PATCH con el estado; 404 si no es mío', async () => {
     const { r, llamadas } = repos({
       'PATCH /api/viajes/v1/estado': [200, respuesta('fase0_patch_viaje_cancelado.json').respuesta],

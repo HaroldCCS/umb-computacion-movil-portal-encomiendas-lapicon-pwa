@@ -6,9 +6,10 @@ import { Aviso } from '../../core/componentes/Aviso'
 import { Boton } from '../../core/componentes/Boton'
 import { Avatar, InsigniaEncomienda } from '../../core/componentes/Insignia'
 import { RouteTicket, TicketDetail } from '../../core/componentes/RouteTicket'
+import { Grupo } from '../../core/componentes/Tarjeta'
 import { Fmt } from '../../core/formato'
 import { Rutas } from '../../core/rutas'
-import { useMisEncomiendas, useResumenCalificaciones } from '../../datos/consultas'
+import { useMisEncomiendas, useResumenCalificaciones, useViajerosSugeridos } from '../../datos/consultas'
 import { Local } from '../../datos/local'
 import type { Encomienda } from '../../datos/modelos/encomienda'
 import { ETIQUETA_ENCOMIENDA, type EstadoEncomienda } from '../../datos/modelos/estado'
@@ -119,6 +120,65 @@ export function AvisosTomadas() {
     >
       Escríbeles por chat para coordinar la entrega.
     </Aviso>
+  )
+}
+
+/**
+ * "Viajeros sugeridos" (docs/11 §2F) en una encomienda disponible: la IA del backend propone viajes
+ * de la ruta y el remitente puede escribirles. Carga aparte y nunca bloquea el detalle.
+ */
+export function ViajerosSugeridos({ e }: { e: Encomienda }) {
+  const navigate = useNavigate()
+  const s = useViajerosSugeridos(e)
+  let cuerpo
+  if (s.isPending) {
+    cuerpo = <p className="p-4 text-[15px] text-texto2">Buscando viajeros para tu ruta…</p>
+  } else if (s.isError) {
+    cuerpo = (
+      <div className="p-4">
+        <Aviso
+          accion={
+            <Boton chico ancho={false} variante="secundario" onClick={() => void s.refetch()}>
+              Reintentar
+            </Boton>
+          }
+        >
+          No pudimos traer sugerencias ahora. Tu encomienda sigue publicada.
+        </Aviso>
+      </div>
+    )
+  } else if (s.data.length === 0) {
+    cuerpo = (
+      <p className="p-4 text-[15px] text-texto2">
+        Aún no hay viajeros sugeridos para esta ruta. Te avisaremos cuando alguien la tome.
+      </p>
+    )
+  } else {
+    cuerpo = s.data.map((v) => (
+      <div key={v.viajeroUid} className="flex flex-col items-start gap-2 p-4">
+        <FilaConfianza uid={v.viajeroUid} nombre={v.nombre} />
+        <p className="text-[13px] text-texto2">
+          Viaja el {Fmt.fecha(v.fechaViaje, { corta: true })} · Afinidad {Math.round(v.afinidad * 100)} %
+        </p>
+        <Boton
+          chico
+          ancho={false}
+          variante="tonal"
+          icono={MessageCircle}
+          onClick={() =>
+            navigate(Rutas.chat(v.viajeroUid), { state: { otroNombre: v.nombre, encomienda: e } satisfies ArgsChat })
+          }
+        >
+          Escribirle
+        </Boton>
+      </div>
+    ))
+  }
+  return (
+    <Grupo titulo="Viajeros sugeridos" pie="Sugeridos por IA según tu ruta, la fecha y lo que pagas.">
+      {/* Cada viajero en su fila, con separador. */}
+      {cuerpo}
+    </Grupo>
   )
 }
 
