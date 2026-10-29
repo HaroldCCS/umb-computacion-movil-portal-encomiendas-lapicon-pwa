@@ -1,5 +1,4 @@
 /** Lógica pura del viajero (port de viajero_logic.dart), probada aparte. */
-import { fechaIso } from '../../core/formato'
 import type { Encomienda } from '../../datos/modelos/encomienda'
 import { esFinalizada, type EstadoEncomienda } from '../../datos/modelos/estado'
 import { esMapa, type Mapa } from '../../datos/modelos/json'
@@ -18,11 +17,6 @@ export function validarNumeroVuelo(valor: string | null | undefined): string | n
   if (!/[A-Z]/.test(v.slice(0, 2))) return 'Empieza con el código de la aerolínea (p. ej. AV, AA, LA).'
   if (!VUELO.test(v)) return 'Revisa el número: debe verse como AV24 o AA123.'
   return null
-}
-
-/** Clave para recordar que un vuelo se verificó. */
-export function claveVuelo(numero: string, fecha: Date | null): string {
-  return `${normalizarVuelo(numero)}|${fecha ? fechaIso(fecha) : ''}`
 }
 
 const prioridad = (e: EstadoEncomienda) =>
@@ -77,7 +71,8 @@ export function conservarNombres(nueva: Encomienda, previa: Encomienda): Encomie
   }
 }
 
-/** Datos legibles de `/api/vuelos/:numero/:fecha` (formas comunes de AeroDataBox). */
+/** Datos legibles de `/api/vuelos/:numero/:fecha` (formas comunes de AeroDataBox).
+ *  No se usa en la interfaz mientras el servidor responda 500; ver docs/11 §2H. */
 export function resumenVuelo(json: Mapa): string[] {
   const nombre = (v: unknown): string | null => {
     if (typeof v === 'string' && v.trim() !== '') return v.trim()

@@ -82,7 +82,7 @@ export function SubTarjetaVidrio({
   )
 }
 
-/** Píldora de vidrio sobre la tarjeta principal ("Vuelo verificado"). */
+/** Píldora de vidrio sobre la tarjeta principal. */
 export function EtiquetaVidrio({ texto, icono: Icono }: { texto: string; icono: LucideIcon }) {
   return (
     <span className="inline-flex items-center gap-1 rounded-full border border-blanco/30 bg-blanco/15 px-2.5 py-1 text-xs font-semibold text-blanco">

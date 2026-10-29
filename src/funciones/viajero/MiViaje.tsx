@@ -1,17 +1,16 @@
-import { BadgeCheck, Banknote, CircleHelp, Headset, Luggage, Plane, PlaneTakeoff } from 'lucide-react'
+import { Banknote, Headset, Luggage, Plane, PlaneTakeoff } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useCalificadas, useLocal, useUid } from '../../app/contexto'
+import { useCalificadas, useLocal } from '../../app/contexto'
 import { Aviso, ErrorCarga, Esqueleto, EsqueletoLista, Vacio } from '../../core/componentes/Aviso'
 import { Boton, BotonIcono } from '../../core/componentes/Boton'
 import { InsigniaViaje, Monto } from '../../core/componentes/Insignia'
 import { Pantalla, Seccion } from '../../core/componentes/Pantalla'
 import { Grupo, TarjetaAccion } from '../../core/componentes/Tarjeta'
-import { EtiquetaVidrio, SubTarjetaVidrio, TarjetaHero } from '../../core/componentes/TarjetaHero'
+import { SubTarjetaVidrio, TarjetaHero } from '../../core/componentes/TarjetaHero'
 import { Fmt } from '../../core/formato'
 import { Rutas } from '../../core/rutas'
 import { mensajeDe } from '../../core/useAccion'
 import { useHistorialViajes, useMiViaje, useMisEntregas, useRefrescarViajero } from '../../datos/consultas'
-import { Local } from '../../datos/local'
 import type { Viaje } from '../../datos/modelos/viaje'
 import { TicketEncomienda, useAbrirEncomiendaViajero } from './componentes'
 import { gananciasPorMoneda, porCalificarViajero, porEntregar } from './logica'
@@ -62,20 +61,16 @@ export function MiViaje() {
 }
 
 function ConViaje({ viaje }: { viaje: Viaje }) {
-  const uid = useUid()
   useLocal()
   const entregas = useMisEntregas()
   const calificadas = useCalificadas()
   const abrir = useAbrirEncomiendaViajero()
-  const verificado = uid !== null && Local.vueloVerificado(uid, viaje.numeroVuelo, viaje.fechaViaje)
   const lista = entregas.data ?? []
   const pendientes = porEntregar(lista)
   const porCalificar = porCalificarViajero(lista, calificadas)
   const ganancias = gananciasPorMoneda(lista)
   const vuelo = viaje.numeroVuelo || 'Vuelo'
   const nota = `${vuelo} · ${Fmt.fecha(viaje.fechaViaje)}`
-  // Si el vuelo no se pudo verificar, la tarjeta lo dice siempre.
-  const etiquetaVuelo = verificado ? 'Vuelo verificado' : 'Sin verificar'
   const [moneda, total] = [...ganancias.entries()][0] ?? []
 
   return (
@@ -89,8 +84,7 @@ function ConViaje({ viaje }: { viaje: Viaje }) {
           </span>
         }
         nota={nota}
-        semantica={`Tu viaje de ${viaje.ciudadOrigen} a ${viaje.ciudadDestino}. ${nota}. ${etiquetaVuelo}. Llevas ${pendientes.length} por entregar.`}
-        insignia={<EtiquetaVidrio texto={etiquetaVuelo} icono={verificado ? BadgeCheck : CircleHelp} />}
+        semantica={`Tu viaje de ${viaje.ciudadOrigen} a ${viaje.ciudadDestino}. ${nota}. Llevas ${pendientes.length} por entregar.`}
         subTarjetas={
           <>
             <SubTarjetaVidrio etiqueta="Por entregar" icono={Luggage} valor={entregas.data ? pendientes.length : '…'} />

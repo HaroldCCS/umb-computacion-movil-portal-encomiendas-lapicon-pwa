@@ -103,7 +103,8 @@ test('de punta a punta: publicar, tomar, entregar y calificar (dos personas)', a
   await conRol(luisP, 'luis@prueba.co', 'viajero')
   await entrar(luisP, 'luis@prueba.co')
   await expect(luisP).toHaveURL(/\/mi-viaje$/)
-  await expect(luisP.getByText('Sin verificar')).toBeVisible()
+  await expect(luisP.getByText('Tu viaje')).toBeVisible()
+  await expect(luisP.getByText(/verific/i)).toHaveCount(0)
   await luisP.getByRole('link', { name: /Explorar/ }).click()
   await luisP.getByRole('button', { name: /te pagan COP 150\.000/ }).click()
   await expect(luisP.getByText('La publicó Ana')).toBeVisible()
@@ -183,7 +184,7 @@ test('retirar exige escribir RETIRAR y la deja vencida', async ({ page }) => {
   expect(estado.encomiendas[0]!.estado).toBe('vencida')
 })
 
-test('viajero: registrar viaje sin verificación y la regla de un solo viaje', async ({ page }) => {
+test('viajero: registrar viaje y la regla de un solo viaje', async ({ page }) => {
   const estado = crearEstado()
   sembrarUsuario(estado, 'luis@prueba.co', 'Luis')
   await instalarApiFalsa(page, estado)
@@ -191,15 +192,15 @@ test('viajero: registrar viaje sin verificación y la regla de un solo viaje', a
   await entrar(page, 'luis@prueba.co')
   await expect(page.getByText('Aún no tienes un viaje activo')).toBeVisible()
   await page.getByRole('button', { name: 'Registrar viaje' }).first().click()
+  // Verificar vuelo se quitó (docs/11 §2H): ningún texto lo menciona.
+  await expect(page.getByText('Los remitentes de tu ruta verán tu vuelo y fecha.')).toBeVisible()
+  await expect(page.getByText(/verific/i)).toHaveCount(0)
   await page.getByLabel('Número de vuelo').fill('av 24')
   await expect(page.getByLabel('Número de vuelo')).toHaveValue('AV 24')
   await page.getByRole('button', { name: /Fecha del vuelo/ }).click()
   await page.getByRole('button', { name: 'Elegir esta fecha' }).click()
   await elegirCiudad(page, /Ciudad de origen/, 'Bogota')
   await elegirCiudad(page, /Ciudad de destino/, 'Lima')
-  // /api/vuelos responde 500 en el servidor: se dice que quedará "sin verificar".
-  await page.getByRole('button', { name: 'Verificar vuelo' }).click()
-  await expect(page.getByText('Verificación no disponible')).toBeVisible()
   await page.getByRole('button', { name: 'Registrar viaje' }).click()
   await expect(page.getByText('Viaje registrado. ¡Buen vuelo!')).toBeVisible()
   await expect(page.getByText('Bogota → Lima').first()).toBeVisible()

@@ -1,7 +1,6 @@
 import { encomiendaAJson, encomiendaDesdeJson, type Encomienda } from './modelos/encomienda'
 import { esMapa } from './modelos/json'
 import { parseRol, type Rol } from './modelos/rol'
-import { claveVuelo } from '../funciones/viajero/logica'
 
 /**
  * Almacenamiento local con las MISMAS claves que la app Flutter (prefs.dart y
@@ -115,16 +114,6 @@ export const Local = {
     actuales.set(e.id, e)
     const json = Object.fromEntries([...actuales.values()].map((x) => [x.id, encomiendaAJson(x)]))
     guardar(`viajero_entregas_${uid}`, JSON.stringify(json))
-    cambio()
-  },
-
-  vueloVerificado(uid: string, numero: string, fecha: Date | null): boolean {
-    return listaDeTextos(leerJson(`viajero_vuelos_verificados_${uid}`)).includes(claveVuelo(numero, fecha))
-  },
-  marcarVueloVerificado(uid: string, numero: string, fecha: Date): void {
-    const s = new Set(listaDeTextos(leerJson(`viajero_vuelos_verificados_${uid}`)))
-    s.add(claveVuelo(numero, fecha))
-    guardar(`viajero_vuelos_verificados_${uid}`, JSON.stringify([...s]))
     cambio()
   },
 

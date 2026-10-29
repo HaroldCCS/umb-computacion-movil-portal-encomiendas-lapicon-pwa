@@ -19,7 +19,6 @@ import {
   validarValor,
 } from './remitente/logica'
 import {
-  claveVuelo,
   combinarEntregas,
   conservarNombres,
   gananciasPorMoneda,
@@ -125,7 +124,6 @@ describe('viajero', () => {
     for (const v of ['', '123', 'A', 'AVIANCA', 'AV12345', 'AV']) expect(validarNumeroVuelo(v)).not.toBeNull()
     expect(normalizarVuelo(' av 24 ')).toBe('AV24')
     expect(normalizarVuelo('la-2401')).toBe('LA2401')
-    expect(claveVuelo('av 24', new Date(2026, 11, 1))).toBe('AV24|2026-12-01')
   })
 
   it('combinarEntregas une servidor y registro local, sin duplicados', () => {

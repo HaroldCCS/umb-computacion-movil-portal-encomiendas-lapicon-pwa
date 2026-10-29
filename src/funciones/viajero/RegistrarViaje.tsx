@@ -1,7 +1,7 @@
-import { ArrowUpDown, BadgeCheck, Calendar, ChevronDown, PlaneLanding, PlaneTakeoff, Ticket } from 'lucide-react'
+import { ArrowUpDown, Calendar, ChevronDown, PlaneLanding, PlaneTakeoff, Ticket } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useRepos, useUid } from '../../app/contexto'
+import { useRepos } from '../../app/contexto'
 import { Aviso } from '../../core/componentes/Aviso'
 import { Boton, BotonIcono } from '../../core/componentes/Boton'
 import { Campo, Formulario, useFormulario } from '../../core/componentes/Campo'
@@ -9,16 +9,13 @@ import { useHojas, type CerrarHoja } from '../../core/componentes/Hoja'
 import { Pantalla, useVolver } from '../../core/componentes/Pantalla'
 import { useToast } from '../../core/componentes/Toast'
 import { fechaIso, Fmt, soloDia } from '../../core/formato'
-import { ApiError, AppError } from '../../core/red/errores'
+import { ApiError } from '../../core/red/errores'
 import { Rutas } from '../../core/rutas'
 import { useAccion } from '../../core/useAccion'
 import { Validadores } from '../../core/validadores'
 import { useRefrescarViajero } from '../../datos/consultas'
-import { Local } from '../../datos/local'
 import { CampoCiudad } from '../catalogo/selectores'
-import { normalizarVuelo, resumenVuelo, validarNumeroVuelo } from './logica'
-
-type Verificacion = 'ninguna' | 'verificando' | 'verificado' | 'noEncontrado' | 'noDisponible'
+import { normalizarVuelo, validarNumeroVuelo } from './logica'
 
 /** Contenido de la hoja de fecha: el selector nativo del teléfono y un botón. */
 function SelectorFecha({ inicial, cerrar }: { inicial: Date; cerrar: CerrarHoja<Date> }) {
@@ -47,11 +44,10 @@ function SelectorFecha({ inicial, cerrar }: { inicial: Date; cerrar: CerrarHoja<
   )
 }
 
-/** Registrar un viaje (`POST /api/viajes`) con verificación del vuelo
- *  (`GET /api/vuelos/:numero/:fecha`, hoy 500 en el servidor). */
+/** Registrar un viaje (`POST /api/viajes`). La consulta del vuelo
+ *  (`GET /api/vuelos/:numero/:fecha`) no se muestra: el servidor responde 500 (docs/11 §2H). */
 export function RegistrarViaje() {
   const repos = useRepos()
-  const uid = useUid()
   const navigate = useNavigate()
   const toast = useToast()
   const volver = useVolver(Rutas.miViaje)
@@ -62,45 +58,14 @@ export function RegistrarViaje() {
   const [fecha, setFecha] = useState<Date | null>(null)
   const [origen, setOrigen] = useState('')
   const [destino, setDestino] = useState('')
-  const [verificacion, setVerificacion] = useState<Verificacion>('ninguna')
-  const [datosVuelo, setDatosVuelo] = useState<string[]>([])
-  const [errorVerificar, setErrorVerificar] = useState<string | null>(null)
   const { cargando, error, setError, ejecutar } = useAccion()
-
-  const reiniciarVerificacion = () => {
-    setVerificacion('ninguna')
-    setDatosVuelo([])
-    setErrorVerificar(null)
-  }
 
   const elegirFecha = async () => {
     const f = await mostrarHoja<Date>({
       titulo: 'Fecha del vuelo',
       contenido: (cerrar) => <SelectorFecha inicial={fecha ?? soloDia(new Date())} cerrar={cerrar} />,
     })
-    if (f) {
-      setFecha(f)
-      reiniciarVerificacion()
-    }
-  }
-
-  const verificar = async () => {
-    const errVuelo = validarNumeroVuelo(vuelo)
-    if (errVuelo || !fecha) {
-      setErrorVerificar(errVuelo ?? 'Elige la fecha del vuelo para verificarlo.')
-      return
-    }
-    setVerificacion('verificando')
-    setErrorVerificar(null)
-    try {
-      const json = await repos.viajes.validarVuelo(normalizarVuelo(vuelo), fecha)
-      setDatosVuelo(resumenVuelo(json))
-      setVerificacion('verificado')
-    } catch (e) {
-      if (e instanceof ApiError && e.noEncontrado) setVerificacion('noEncontrado')
-      else if (e instanceof AppError) setVerificacion('noDisponible')
-      else throw e
-    }
+    if (f) setFecha(f)
   }
 
   const registrar = () => {
@@ -125,7 +90,6 @@ export function RegistrarViaje() {
         }
         throw e
       }
-      if (uid && verificacion === 'verificado') Local.marcarVueloVerificado(uid, numero, fecha!)
       refrescar()
       toast('Viaje registrado. ¡Buen vuelo!')
       volver()
@@ -144,26 +108,17 @@ export function RegistrarViaje() {
     })
   }
 
-  const reintentar = (
-    <Boton chico ancho={false} variante="secundario" onClick={cargando ? null : () => void verificar()}>
-      Intentar de nuevo
-    </Boton>
-  )
-
   return (
     <Pantalla
       titulo="Registrar viaje"
       atras="Mi viaje"
-      subtitulo="Lo verificamos con la aerolínea para que los remitentes confíen en ti."
+      subtitulo="Los remitentes de tu ruta verán tu vuelo y fecha."
     >
       <Formulario form={form} alEnviar={registrar} className="flex flex-col">
         <Campo
           etiqueta="Número de vuelo"
           valor={vuelo}
-          alCambiar={(v) => {
-            setVuelo(v.replace(/[^A-Za-z0-9 ]/g, '').toUpperCase().slice(0, 8))
-            reiniciarVerificacion()
-          }}
+          alCambiar={(v) => setVuelo(v.replace(/[^A-Za-z0-9 ]/g, '').toUpperCase().slice(0, 8))}
           pista="AV24"
           ayuda="Código de la aerolínea y número, como aparece en tu pasabordo."
           icono={Ticket}
@@ -200,37 +155,6 @@ export function RegistrarViaje() {
         </div>
         <CampoCiudad etiqueta="Ciudad de destino" valor={destino} alCambiar={setDestino} icono={PlaneLanding} />
 
-        {/* Si no se pudo verificar, se dice claro que quedará "sin verificar". */}
-        <div className="mt-6" aria-live="polite">
-          {verificacion === 'ninguna' || verificacion === 'verificando' ? (
-            <div className="flex flex-col gap-2">
-              <Boton
-                icono={BadgeCheck}
-                variante="tonal"
-                cargando={verificacion === 'verificando'}
-                textoCargando="Verificando vuelo…"
-                onClick={cargando ? null : () => void verificar()}
-              >
-                Verificar vuelo
-              </Boton>
-              {errorVerificar && <Aviso tipo="error">{errorVerificar}</Aviso>}
-            </div>
-          ) : verificacion === 'verificado' ? (
-            <Aviso titulo="Vuelo verificado" tipo="exito">
-              {datosVuelo.length === 0 ? 'La aerolínea confirma tu vuelo.' : datosVuelo.join('\n')}
-            </Aviso>
-          ) : verificacion === 'noEncontrado' ? (
-            <Aviso titulo="Vuelo no encontrado" tipo="atencion" accion={reintentar}>
-              No encontramos ese vuelo para esa fecha. Revisa el número y la fecha; si estás seguro, puedes registrarlo
-              igual y aparecerá como "sin verificar".
-            </Aviso>
-          ) : (
-            <Aviso titulo="Verificación no disponible" tipo="atencion" accion={reintentar}>
-              Ahora no pudimos verificar el vuelo. Puedes registrarlo igual: aparecerá como "sin verificar".
-            </Aviso>
-          )}
-        </div>
-
         <div className="mt-7 flex flex-col gap-3">
           {error && <Aviso tipo="error">{error}</Aviso>}
           <Boton
@@ -238,7 +162,6 @@ export function RegistrarViaje() {
             icono={PlaneTakeoff}
             cargando={cargando}
             textoCargando="Registrando…"
-            className={verificacion === 'verificando' ? 'pointer-events-none opacity-40' : ''}
           >
             Registrar viaje
           </Boton>

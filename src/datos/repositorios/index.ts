@@ -85,7 +85,8 @@ export function crearRepositorios(api: ClienteApi) {
     /** `POST /api/viajes`. 400 si ya hay un viaje activo. */
     crear: async (d: Parameters<typeof cuerpoViaje>[0]): Promise<Viaje> =>
       viajeDesdeJson(await api.post('/api/viajes', { cuerpo: cuerpoViaje(d) })),
-    /** Verifica el vuelo (`GET /api/vuelos/:numero/:fecha`); hoy responde 500. */
+    /** Consulta el vuelo (`GET /api/vuelos/:numero/:fecha`). No se usa en la interfaz mientras el
+     *  servidor responda 500 (`RAPIDAPI_KEY`); ver docs/11 §2H. Solo lo prueba `humo`. */
     async validarVuelo(numero: string, fecha: Date): Promise<Mapa> {
       const json = await api.get(`/api/vuelos/${numero.replaceAll(' ', '').toUpperCase()}/${fechaIso(fecha)}`)
       if (esMapa(json)) return json
