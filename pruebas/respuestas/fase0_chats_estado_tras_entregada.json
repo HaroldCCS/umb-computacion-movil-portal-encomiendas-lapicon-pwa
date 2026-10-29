@@ -1,0 +1,10 @@
+{
+  "endpoint": "GET /api/chats/estado/Cpmc8Mv0CkTD0aJJMtiOBEzDNV03_IeMGfjHQ7XTc0W08QrTzx1flvo13",
+  "fecha": "2026-10-28",
+  "body": null,
+  "status": 200,
+  "respuesta": {
+    "estado": "cerrado",
+    "fechaCierre": "2026-10-29T00:46:00.283Z"
+  }
+}

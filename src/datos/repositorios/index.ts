@@ -82,6 +82,13 @@ export function crearRepositorios(api: ClienteApi) {
     /** Viajeros que salen de `ciudad` (`GET /api/viajes/buscar?ciudad=`). */
     buscarPorOrigen: async (ciudad: string): Promise<Viaje[]> =>
       listaViajes(await api.get('/api/viajes/buscar', { query: { ciudad } })),
+    /** Cancela o cierra mi viaje (`PATCH /api/viajes/{id}/estado`). Después se puede registrar otro.
+     *  404 si no es mío. El servidor no revisa si lleva encomiendas: eso lo hace la pantalla. */
+    async cambiarEstado(id: string, estado: 'cancelado' | 'completado'): Promise<Viaje | null> {
+      const json = await api.patch(`/api/viajes/${id}/estado`, { cuerpo: { estado } })
+      const v = viajeDesdeJson(json)
+      return v.id === '' ? null : v
+    },
     /** `POST /api/viajes`. 400 si ya hay un viaje activo. */
     crear: async (d: Parameters<typeof cuerpoViaje>[0]): Promise<Viaje> =>
       viajeDesdeJson(await api.post('/api/viajes', { cuerpo: cuerpoViaje(d) })),

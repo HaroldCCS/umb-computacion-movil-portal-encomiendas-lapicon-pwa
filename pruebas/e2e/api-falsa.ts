@@ -221,6 +221,14 @@ async function responder(estado: EstadoApi, route: Route) {
     })
     return json(201, v)
   }
+  if (metodo === 'PATCH' && (x = m(/^\/api\/viajes\/([^/]+)\/estado$/))) {
+    const v = estado.viajes.find((y) => y._id === x![1] && y.uid === yo)
+    if (!v) return json(404, { error: 'Viaje no encontrado o no autorizado' })
+    const nuevo = String(cuerpo['estado'])
+    if (!['disponible', 'completado', 'cancelado'].includes(nuevo)) return json(400, { error: 'Estado inválido' })
+    v.estado = nuevo
+    return json(200, { message: 'Estado actualizado', viaje: v })
+  }
   if (ruta.startsWith('/api/vuelos/')) return json(500, { error: 'RAPIDAPI_KEY no está configurada en el servidor' })
 
   // Calificaciones

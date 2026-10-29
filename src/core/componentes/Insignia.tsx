@@ -3,8 +3,10 @@ import {
   CheckCheck,
   CircleCheck,
   CircleHelp,
+  CircleX,
   Clock,
   Luggage,
+  MessageCircle,
   PlaneLanding,
   PlaneTakeoff,
   Star,
@@ -67,6 +69,8 @@ export function InsigniaEncomienda({ estado }: { estado: EstadoEncomienda }) {
 const VIAJE: Record<EstadoViaje, [LucideIcon, TipoInsignia]> = {
   disponible: [PlaneTakeoff, 'info'],
   completado: [PlaneLanding, 'neutra'],
+  cancelado: [CircleX, 'peligro'],
+  contactado: [MessageCircle, 'info'],
   desconocido: [CircleHelp, 'neutra'],
 }
 

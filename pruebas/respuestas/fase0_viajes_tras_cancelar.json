@@ -1,0 +1,19 @@
+{
+  "endpoint": "GET /api/viajes",
+  "fecha": "2026-10-28",
+  "body": null,
+  "status": 200,
+  "respuesta": [
+    {
+      "_id": "6ae25c6a411da1034525b232",
+      "uid": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+      "numeroVuelo": "A777",
+      "ciudadOrigen": "Bogota",
+      "ciudadDestino": "Medellin",
+      "fechaViaje": "2026-10-30T00:00:00.000Z",
+      "estado": "cancelado",
+      "createdAt": "2026-10-28T20:34:50.718Z",
+      "__v": 0
+    }
+  ]
+}

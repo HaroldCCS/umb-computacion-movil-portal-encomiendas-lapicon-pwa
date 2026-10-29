@@ -1,0 +1,29 @@
+{
+  "endpoint": "POST /api/encomiendas/emparejar-viajes",
+  "fecha": "2026-10-28",
+  "body": {
+    "ciudadOrigen": "Bogota",
+    "ciudadDestino": "Miami",
+    "fechaEncomienda": "2026-11-30",
+    "valorEncomienda": 20
+  },
+  "status": 200,
+  "respuesta": [
+    {
+      "viajeId": "6ad95bc8f8b6da54469cfc4f",
+      "uid": "mdXW0aoFp3dCis7gGvLBzTpHFBy1",
+      "afinidad": 0.868,
+      "ciudadOrigen": "Bogota",
+      "ciudadDestino": "Miami",
+      "fechaViaje": "2026-12-01T00:00:00.000Z"
+    },
+    {
+      "viajeId": "6ada5e75a4012aeb7e63d873",
+      "uid": "IeMGfjHQ7XTc0W08QrTzx1flvo13",
+      "afinidad": 0.868,
+      "ciudadOrigen": "Bogota",
+      "ciudadDestino": "Miami",
+      "fechaViaje": "2026-12-01T00:00:00.000Z"
+    }
+  ]
+}

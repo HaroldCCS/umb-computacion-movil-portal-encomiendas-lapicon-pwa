@@ -1,0 +1,29 @@
+{
+  "endpoint": "GET /api/encomiendas/buscar?origen=Cali&destino=Lima",
+  "fecha": "2026-10-28",
+  "body": null,
+  "status": 200,
+  "respuesta": {
+    "disponibles": [],
+    "tomadas": [
+      {
+        "_id": "6ae296ed411da1034525b384",
+        "uid": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+        "ciudadOrigen": "Cali",
+        "ciudadDestino": "Lima",
+        "observaciones": "Prueba Fase 0 (desechable) A",
+        "moneda": "USD",
+        "valor": 1,
+        "estado": "tomada",
+        "viajeroId": "IeMGfjHQ7XTc0W08QrTzx1flvo13",
+        "fechaCreacion": "2026-10-29T00:44:29.598Z",
+        "fechaVencimiento": "2026-11-29T00:44:29.598Z",
+        "fechaDisponibleDesde": "2026-10-29T00:44:29.598Z",
+        "fechaLimiteEntrega": null,
+        "fotoUrl": null,
+        "__v": 0,
+        "remitenteNombre": "Harold"
+      }
+    ]
+  }
+}

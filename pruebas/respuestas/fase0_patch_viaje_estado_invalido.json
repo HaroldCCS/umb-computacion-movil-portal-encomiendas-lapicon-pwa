@@ -1,0 +1,11 @@
+{
+  "endpoint": "PATCH /api/viajes/6ae25c6a411da1034525b232/estado",
+  "fecha": "2026-10-28",
+  "body": {
+    "estado": "falso"
+  },
+  "status": 400,
+  "respuesta": {
+    "error": "Estado inválido"
+  }
+}

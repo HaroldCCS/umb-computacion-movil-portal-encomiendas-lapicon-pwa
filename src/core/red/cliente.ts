@@ -69,6 +69,10 @@ export class ClienteApi {
     return this.enviar<T>('PUT', ruta, opciones)
   }
 
+  patch<T = unknown>(ruta: string, opciones: OpcionesPeticion = {}) {
+    return this.enviar<T>('PATCH', ruta, opciones)
+  }
+
   /** `base + ruta + ?query` (con base vacía, ruta relativa al mismo origen). */
   url(ruta: string, query?: Record<string, string>): string {
     const params = query && Object.keys(query).length > 0 ? `?${new URLSearchParams(query)}` : ''

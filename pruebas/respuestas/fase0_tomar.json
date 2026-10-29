@@ -1,0 +1,9 @@
+{
+  "endpoint": "PUT /api/encomiendas/tomar/6ae296ed411da1034525b384",
+  "fecha": "2026-10-28",
+  "body": null,
+  "status": 200,
+  "respuesta": {
+    "mensaje": "Encomienda tomada exitosamente"
+  }
+}

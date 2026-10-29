@@ -1,15 +1,17 @@
-import { Banknote, Headset, Luggage, Plane, PlaneTakeoff } from 'lucide-react'
+import { Banknote, CircleX, Headset, Luggage, Plane, PlaneTakeoff } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
-import { useCalificadas, useLocal } from '../../app/contexto'
+import { useCalificadas, useLocal, useRepos } from '../../app/contexto'
 import { Aviso, ErrorCarga, Esqueleto, EsqueletoLista, Vacio } from '../../core/componentes/Aviso'
 import { Boton, BotonIcono } from '../../core/componentes/Boton'
 import { InsigniaViaje, Monto } from '../../core/componentes/Insignia'
 import { Pantalla, Seccion } from '../../core/componentes/Pantalla'
+import { useHojas } from '../../core/componentes/Hoja'
 import { Grupo, TarjetaAccion } from '../../core/componentes/Tarjeta'
 import { SubTarjetaVidrio, TarjetaHero } from '../../core/componentes/TarjetaHero'
 import { Fmt } from '../../core/formato'
 import { Rutas } from '../../core/rutas'
-import { mensajeDe } from '../../core/useAccion'
+import { mensajeDe, useAccion } from '../../core/useAccion'
+import { useToast } from '../../core/componentes/Toast'
 import { useHistorialViajes, useMiViaje, useMisEntregas, useRefrescarViajero } from '../../datos/consultas'
 import type { Viaje } from '../../datos/modelos/viaje'
 import { TicketEncomienda, useAbrirEncomiendaViajero } from './componentes'
@@ -132,8 +134,70 @@ function ConViaje({ viaje }: { viaje: Viaje }) {
         />
       ))}
       <MisEntregas />
+      <CancelarViaje viaje={viaje} pendientes={entregas.data ? pendientes.length : null} />
       <Historial />
     </div>
+  )
+}
+
+/** Cancelar el viaje (`PATCH /api/viajes/{id}/estado`). Irreversible: se confirma escribiendo CANCELAR.
+ *  Con encomiendas por entregar no deja seguir: el servidor no lo revisa. `pendientes` es `null` mientras cargan. */
+function CancelarViaje({ viaje, pendientes }: { viaje: Viaje; pendientes: number | null }) {
+  const repos = useRepos()
+  const navigate = useNavigate()
+  const toast = useToast()
+  const refrescar = useRefrescarViajero()
+  const abrir = useAbrirEncomiendaViajero()
+  const entregas = useMisEntregas()
+  const { confirmar } = useHojas()
+  const { cargando, error, ejecutar } = useAccion()
+
+  const cancelar = async () => {
+    if (pendientes === null) return
+    if (pendientes > 0) {
+      const ver = await confirmar({
+        titulo: 'Aún llevas encomiendas',
+        mensaje:
+          pendientes === 1
+            ? 'Tienes una encomienda por entregar. Entrégala o habla con el remitente antes de cancelar el viaje.'
+            : `Tienes ${pendientes} encomiendas por entregar. Entrégalas o habla con los remitentes antes de cancelar el viaje.`,
+        confirmarTexto: 'Ver por entregar',
+        cancelarTexto: 'Entendido',
+      })
+      const primera = porEntregar(entregas.data ?? [])[0]
+      if (ver && primera) abrir(primera, 'entregar')
+      return
+    }
+    const ok = await confirmar({
+      titulo: '¿Cancelar tu viaje?',
+      mensaje: `Tu viaje ${viaje.ciudadOrigen} → ${viaje.ciudadDestino} deja de aparecer a los remitentes y podrás registrar otro. Esta acción no se puede deshacer.`,
+      confirmarTexto: 'Sí, cancelarlo',
+      cancelarTexto: 'No, mantenerlo',
+      destructivo: true,
+      palabra: 'CANCELAR',
+    })
+    if (!ok) return
+    void ejecutar(async () => {
+      await repos.viajes.cambiarEstado(viaje.id, 'cancelado')
+      refrescar()
+      toast('Viaje cancelado. Puedes registrar otro.')
+      navigate(Rutas.registrarViaje)
+    })
+  }
+
+  return (
+    <section className="flex flex-col gap-3">
+      {error && <Aviso tipo="error">{error}</Aviso>}
+      <Boton
+        icono={CircleX}
+        variante="peligro"
+        cargando={cargando}
+        textoCargando="Cancelando…"
+        onClick={pendientes === null ? null : () => void cancelar()}
+      >
+        Cancelar viaje
+      </Boton>
+    </section>
   )
 }
 

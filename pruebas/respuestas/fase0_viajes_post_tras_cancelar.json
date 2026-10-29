@@ -1,0 +1,22 @@
+{
+  "endpoint": "POST /api/viajes",
+  "fecha": "2026-10-28",
+  "body": {
+    "numeroVuelo": "LA2401",
+    "ciudadOrigen": "Cali",
+    "ciudadDestino": "Lima",
+    "fechaViaje": "2026-12-10"
+  },
+  "status": 201,
+  "respuesta": {
+    "uid": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+    "numeroVuelo": "LA2401",
+    "ciudadOrigen": "Cali",
+    "ciudadDestino": "Lima",
+    "fechaViaje": "2026-12-10T00:00:00.000Z",
+    "estado": "disponible",
+    "_id": "6ae29800411da1034525b3de",
+    "createdAt": "2026-10-29T00:49:04.238Z",
+    "__v": 0
+  }
+}

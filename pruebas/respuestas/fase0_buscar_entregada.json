@@ -1,0 +1,10 @@
+{
+  "endpoint": "GET /api/encomiendas/buscar?origen=Cali&destino=Lima",
+  "fecha": "2026-10-28",
+  "body": null,
+  "status": 200,
+  "respuesta": {
+    "disponibles": [],
+    "tomadas": []
+  }
+}

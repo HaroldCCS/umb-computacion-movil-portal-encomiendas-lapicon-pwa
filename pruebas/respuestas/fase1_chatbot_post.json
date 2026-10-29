@@ -1,0 +1,17 @@
+{
+  "endpoint": "POST /api/chatbot",
+  "fecha": "2026-10-28",
+  "body": {
+    "mensajeUsuario": "Hola"
+  },
+  "status": 500,
+  "respuesta": {
+    "error": "Error al generar respuesta con OpenRouter",
+    "detalle": {
+      "error": {
+        "message": "User not found.",
+        "code": 401
+      }
+    }
+  }
+}

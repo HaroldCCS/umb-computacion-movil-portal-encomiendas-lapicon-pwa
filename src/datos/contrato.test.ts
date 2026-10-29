@@ -6,7 +6,7 @@ import { ClienteApi } from '../core/red/cliente'
 import { ApiError, SinSesionError } from '../core/red/errores'
 import { resumenDesdeJson } from './modelos/calificaciones'
 import { cuerpoEncomienda, encomiendaDesdeJson } from './modelos/encomienda'
-import { parseEstadoEncomienda } from './modelos/estado'
+import { parseEstadoEncomienda, parseEstadoViaje } from './modelos/estado'
 import { leerFechaValor } from './modelos/json'
 import { usuarioDesdeJson, perfilCompleto } from './modelos/usuario'
 import { cuerpoViaje, viajeDesdeJson } from './modelos/viaje'
@@ -121,6 +121,21 @@ describe('modelos tolerantes', () => {
   })
 })
 
+describe('respuestas del Swagger oficial (28-oct-2026)', () => {
+  it('PATCH /api/viajes/:id/estado devuelve el viaje envuelto en "viaje"', () => {
+    const v = viajeDesdeJson(respuesta('fase0_patch_viaje_cancelado.json').respuesta)
+    expect([v.id, v.numeroVuelo, v.estado]).toEqual(['6ae25c6a411da1034525b232', 'A777', 'cancelado'])
+    expect(viajeDesdeJson(respuesta('fase0_patch_viaje_completado.json').respuesta).estado).toBe('completado')
+  })
+
+  it('estados de viaje: cancelado y contactado; lo desconocido no rompe', () => {
+    expect(parseEstadoViaje('Cancelado')).toBe('cancelado')
+    expect(parseEstadoViaje('contactado')).toBe('contactado')
+    expect(parseEstadoViaje('pausado')).toBe('desconocido')
+    expect(parseEstadoViaje(null)).toBe('desconocido')
+  })
+})
+
 /** Cliente con un fetch falso que responde lo que diga `rutas`. */
 function repos(rutas: Record<string, [number, unknown]>, token: string | null = 'tk') {
   const llamadas: { url: string; init: RequestInit }[] = []
@@ -158,6 +173,20 @@ describe('repositorios (endpoints de la matriz §10.5)', () => {
     expect(err).toBeInstanceOf(ApiError)
     expect((err as ApiError).reglaDeNegocio).toBe(true)
     expect((err as ApiError).message).toMatch(/Ya tienes un viaje disponible/)
+  })
+
+  it('cancelar viaje: PATCH con el estado; 404 si no es mío', async () => {
+    const { r, llamadas } = repos({
+      'PATCH /api/viajes/v1/estado': [200, respuesta('fase0_patch_viaje_cancelado.json').respuesta],
+      'PATCH /api/viajes/ajeno/estado': [404, respuesta('fase0_patch_viaje_ajeno.json').respuesta],
+    })
+    expect((await r.viajes.cambiarEstado('v1', 'cancelado'))?.estado).toBe('cancelado')
+    expect(llamadas[0]!.init.method).toBe('PATCH')
+    expect(JSON.parse(String(llamadas[0]!.init.body))).toEqual({ estado: 'cancelado' })
+    await expect(r.viajes.cambiarEstado('ajeno', 'cancelado')).rejects.toMatchObject({
+      status: 404,
+      message: 'Viaje no encontrado o no autorizado',
+    })
   })
 
   it('vuelos, estado del chat y chatbot: el 500 del servidor se maneja como en Flutter', async () => {

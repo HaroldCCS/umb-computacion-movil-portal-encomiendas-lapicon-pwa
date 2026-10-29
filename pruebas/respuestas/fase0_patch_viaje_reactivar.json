@@ -1,0 +1,22 @@
+{
+  "endpoint": "PATCH /api/viajes/6ae25c6a411da1034525b232/estado",
+  "fecha": "2026-10-28",
+  "body": {
+    "estado": "disponible"
+  },
+  "status": 200,
+  "respuesta": {
+    "message": "Estado actualizado",
+    "viaje": {
+      "_id": "6ae25c6a411da1034525b232",
+      "uid": "Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+      "numeroVuelo": "A777",
+      "ciudadOrigen": "Bogota",
+      "ciudadDestino": "Medellin",
+      "fechaViaje": "2026-10-30T00:00:00.000Z",
+      "estado": "disponible",
+      "createdAt": "2026-10-28T20:34:50.718Z",
+      "__v": 0
+    }
+  }
+}

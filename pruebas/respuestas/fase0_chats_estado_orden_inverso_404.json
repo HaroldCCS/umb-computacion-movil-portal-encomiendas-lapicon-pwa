@@ -1,0 +1,9 @@
+{
+  "endpoint": "GET /api/chats/estado/IeMGfjHQ7XTc0W08QrTzx1flvo13_Cpmc8Mv0CkTD0aJJMtiOBEzDNV03",
+  "fecha": "2026-10-28",
+  "body": null,
+  "status": 404,
+  "respuesta": {
+    "error": "Chat no encontrado"
+  }
+}

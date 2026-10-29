@@ -1,0 +1,9 @@
+{
+  "endpoint": "POST /api/encomiendas/evaluar-emparejamiento",
+  "fecha": "2026-10-28",
+  "body": {},
+  "status": 500,
+  "respuesta": {
+    "error": "Error al consultar motor de emparejamiento"
+  }
+}

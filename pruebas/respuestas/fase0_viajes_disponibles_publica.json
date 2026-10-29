@@ -1,0 +1,22 @@
+{
+  "endpoint": "GET /api/viajes/disponibles?ciudadOrigen=Bogota&ciudadDestino=Miami",
+  "fecha": "2026-10-28",
+  "body": null,
+  "status": 200,
+  "respuesta": [
+    {
+      "ciudadOrigen": "Bogota",
+      "ciudadDestino": "Miami",
+      "fechaViaje": "2026-12-01T00:00:00.000Z",
+      "nombreUsuario": "QA Editado",
+      "uid": "mdXW0aoFp3dCis7gGvLBzTpHFBy1"
+    },
+    {
+      "ciudadOrigen": "Bogota",
+      "ciudadDestino": "Miami",
+      "fechaViaje": "2026-12-01T00:00:00.000Z",
+      "nombreUsuario": "Harold Viajero",
+      "uid": "IeMGfjHQ7XTc0W08QrTzx1flvo13"
+    }
+  ]
+}

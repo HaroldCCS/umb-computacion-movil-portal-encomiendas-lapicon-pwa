@@ -1,0 +1,9 @@
+{
+  "endpoint": "GET /api/encomiendas/mis-encomiendas",
+  "fecha": "2026-10-28",
+  "body": null,
+  "status": 200,
+  "respuesta": {
+    "disponibles": []
+  }
+}

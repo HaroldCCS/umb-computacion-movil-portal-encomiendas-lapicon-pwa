@@ -26,17 +26,22 @@ export const esActiva = (e: EstadoEncomienda) => e === 'disponible' || e === 'to
 /** Ya llegó a destino (entregada por el viajero o recibida). */
 export const esFinalizada = (e: EstadoEncomienda) => e === 'entregada' || e === 'recibida'
 
-export type EstadoViaje = 'disponible' | 'completado' | 'desconocido'
+/** `contactado` solo aparece en el Swagger oficial (el PATCH lo rechaza); se muestra si llega. */
+export type EstadoViaje = 'disponible' | 'completado' | 'cancelado' | 'contactado' | 'desconocido'
 
 export const ETIQUETA_VIAJE: Record<EstadoViaje, string> = {
   disponible: 'Activo',
   completado: 'Completado',
+  cancelado: 'Cancelado',
+  contactado: 'Contactado',
   desconocido: 'Sin estado',
 }
 
+const ESTADOS_VIAJE: readonly EstadoViaje[] = ['disponible', 'completado', 'cancelado', 'contactado']
+
 export function parseEstadoViaje(v: unknown): EstadoViaje {
   const t = v === null || v === undefined ? '' : String(v).trim().toLowerCase()
-  return t === 'disponible' || t === 'completado' ? t : 'desconocido'
+  return ESTADOS_VIAJE.find((e) => e === t) ?? 'desconocido'
 }
 
 /** Estado del chat según `GET /api/chats/estado/:chatId`. */

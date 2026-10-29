@@ -1,0 +1,11 @@
+{
+  "endpoint": "PATCH /api/viajes/000000000000000000000000/estado",
+  "fecha": "2026-10-28",
+  "body": {
+    "estado": "cancelado"
+  },
+  "status": 404,
+  "respuesta": {
+    "error": "Viaje no encontrado o no autorizado"
+  }
+}
