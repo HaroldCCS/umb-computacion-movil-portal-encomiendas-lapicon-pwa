@@ -9,7 +9,7 @@ import { Pantalla } from '../../core/componentes/Pantalla'
 import { Rutas } from '../../core/rutas'
 import { mensajeDe } from '../../core/useAccion'
 import { Claves, useMisEncomiendas } from '../../datos/consultas'
-import { TicketEnvio } from './componentes'
+import { AvisosTomadas, TicketEnvio } from './componentes'
 import { useAbrirEnvio } from './InicioRemitente'
 import { agruparEnvios, parsePestana, PESTANAS_ENVIOS, resumenEnvios, TITULO_PESTANA, type PestanaEnvios } from './logica'
 
@@ -56,6 +56,7 @@ export function Envios() {
         />
       }
     >
+      <AvisosTomadas />
       {envios.isError ? (
         <ErrorCarga mensaje={mensajeDe(envios.error, 'No pudimos cargar tus envíos.')} alReintentar={() => void envios.refetch()} />
       ) : !grupos ? (

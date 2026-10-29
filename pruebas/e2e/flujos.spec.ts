@@ -114,8 +114,25 @@ test('de punta a punta: publicar, tomar, entregar y calificar (dos personas)', a
   await luisP.getByRole('button', { name: 'Sí, tomarla' }).click()
   await expect(luisP.getByText('¡Listo! La encomienda es tuya.')).toBeVisible()
   await expect(luisP.getByRole('button', { name: 'Marcar como entregada' })).toBeVisible()
+  // Queda claro que la lleva él y qué sigue (docs/11 §2G), sin depender del toast.
+  await expect(luisP.getByText('Tú llevas esta encomienda')).toBeVisible()
+  await expect(luisP.getByText('Llévalo en tu viaje AV24.')).toBeVisible()
+  await expect(luisP.getByRole('img', { name: 'Estado: La llevas tú' })).toBeVisible()
+
+  // Remitente: al entrar ve el aviso de que se la tomaron, sin tocar nada.
+  await ana.reload()
+  await expect(ana.getByText('¡Un viajero tomó tu encomienda Bogota → Miami!')).toBeVisible()
+  await expect(ana.getByText('1 tomada por un viajero.')).toBeVisible()
+  await expect(ana.getByRole('link', { name: /Envíos, 1 nueva/ })).toBeVisible()
+  await ana.getByRole('button', { name: 'Ver envío' }).click()
+  await expect(ana.getByRole('img', { name: 'Estado: Tomada' }).first()).toBeVisible()
+  await expect(ana.getByText('Un viajero aceptó llevarla. Coordinen por chat dónde y cuándo se la entregas.')).toBeVisible()
+  await expect(ana.getByRole('listitem', { name: 'Tomada por un viajero: paso actual' })).toBeVisible()
+  await ana.goto('/inicio')
+  await expect(ana.getByText(/tomó tu encomienda/)).toHaveCount(0)
+
   // El viajero escribe primero: el chat con el remitente ya está habilitado.
-  await luisP.getByRole('button', { name: 'Abrir chat con el remitente' }).click()
+  await luisP.getByRole('button', { name: 'Escribir al remitente' }).click()
   await expect(luisP).toHaveURL(new RegExp(`/chat/${uidDe('ana@prueba.co')}$`))
   await luisP.getByLabel('Escribe un mensaje').fill('Hola Ana, ¿dónde te recojo el paquete?')
   await luisP.getByRole('button', { name: 'Enviar mensaje' }).click()
@@ -266,6 +283,10 @@ test('viajero: con encomiendas por entregar no deja cancelar el viaje', async ({
   await page.getByRole('button', { name: 'Tomar encomienda' }).click()
   await page.getByRole('button', { name: 'Sí, tomarla' }).click()
   await expect(page.getByText(/La encomienda es tuya/)).toBeVisible()
+  // En Explorar, la que llevo va aparte y arriba (docs/11 §2G).
+  await page.goto('/explorar')
+  await expect(page.getByRole('heading', { name: 'Las que llevas' })).toBeVisible()
+  await expect(page.getByRole('button', { name: /te pagan USD 25, La llevas tú/ })).toBeVisible()
   await page.goto('/mi-viaje')
   await page.getByRole('button', { name: 'Cancelar viaje' }).click()
   const hoja = page.getByRole('dialog', { name: 'Aún llevas encomiendas' })

@@ -1,12 +1,19 @@
-import { CalendarX, Circle, CircleCheck, CircleDot } from 'lucide-react'
-import { useLocation } from 'react-router-dom'
+import { CalendarX, Circle, CircleCheck, CircleDot, MessageCircle } from 'lucide-react'
+import { useEffect } from 'react'
+import { useLocation, useNavigate } from 'react-router-dom'
+import { useLocal, useUid } from '../../app/contexto'
+import { Aviso } from '../../core/componentes/Aviso'
+import { Boton } from '../../core/componentes/Boton'
 import { Avatar, InsigniaEncomienda } from '../../core/componentes/Insignia'
 import { RouteTicket, TicketDetail } from '../../core/componentes/RouteTicket'
 import { Fmt } from '../../core/formato'
+import { Rutas } from '../../core/rutas'
 import { useMisEncomiendas, useResumenCalificaciones } from '../../datos/consultas'
+import { Local } from '../../datos/local'
 import type { Encomienda } from '../../datos/modelos/encomienda'
 import { ETIQUETA_ENCOMIENDA, type EstadoEncomienda } from '../../datos/modelos/estado'
-import { PASOS_ENCOMIENDA, pasoActual } from './logica'
+import type { ArgsChat } from '../chat/ChatPantalla'
+import { actualizarVistos, nuevasTomadas, PASOS_ENCOMIENDA, pasoActual } from './logica'
 
 /** Tarjeta-pase de una encomienda del remitente (FECHA · VALOR · estado). */
 export function TicketEnvio({ e, onClick, compacto }: { e: Encomienda; onClick?: () => void; compacto?: boolean }) {
@@ -19,7 +26,9 @@ export function TicketEnvio({ e, onClick, compacto }: { e: Encomienda; onClick?:
       // Ámbar oscuro (acento del remitente) para que el avión se vea en claro.
       acento="atencion"
       onClick={onClick}
-      etiqueta={`Encomienda de ${e.ciudadOrigen} a ${e.ciudadDestino}, ${Fmt.dinero(e.valor, e.moneda)}, ${ETIQUETA_ENCOMIENDA[e.estado]}`}
+      etiqueta={`Encomienda de ${e.ciudadOrigen} a ${e.ciudadDestino}, ${Fmt.dinero(e.valor, e.moneda)}, ${
+        e.estado === 'tomada' ? (e.viajeroNombre ? `tomada por ${e.viajeroNombre}` : 'un viajero la tomó') : ETIQUETA_ENCOMIENDA[e.estado]
+      }`}
       detalles={[
         <TicketDetail key="f" etiqueta={vence ? 'Vence' : 'Fecha'} valor={Fmt.fecha(vence ?? e.creadaEn, { corta: true })} />,
         <TicketDetail key="v" etiqueta="Valor" valor={Fmt.dinero(e.valor, e.moneda)} />,
@@ -29,7 +38,91 @@ export function TicketEnvio({ e, onClick, compacto }: { e: Encomienda; onClick?:
   )
 }
 
-/** Línea de tiempo: Publicada → Tomada → Entregada → Calificada. */
+/**
+ * Encomiendas que un viajero tomó y el remitente aún no ha visto (docs/11 §2G), con la clave
+ * local `remitente_estados_vistos_{uid}`. Al cargar la lista se guarda como visto todo lo demás.
+ */
+export function useNuevasTomadas() {
+  const uid = useUid()
+  useLocal()
+  const envios = useMisEncomiendas()
+  const lista = envios.data
+  const nuevas = uid && lista ? nuevasTomadas(lista, Local.estadosVistos(uid)) : []
+  useEffect(() => {
+    if (uid && lista) Local.guardarEstadosVistos(uid, actualizarVistos(lista, Local.estadosVistos(uid)))
+  }, [uid, lista])
+  const marcarVistas = (...vistas: Encomienda[]) => {
+    if (!uid) return
+    const mapa = { ...(Local.estadosVistos(uid) ?? {}) }
+    for (const e of vistas) mapa[e.id] = e.estado
+    Local.guardarEstadosVistos(uid, mapa)
+  }
+  return { nuevas, marcarVistas }
+}
+
+/** "¡Un viajero tomó tu encomienda…!": va arriba en Inicio y Envíos hasta que se ve. */
+export function AvisoTomada({ e, alVer }: { e: Encomienda; alVer: (e: Encomienda) => void }) {
+  const navigate = useNavigate()
+  const quien = e.viajeroNombre ?? 'Un viajero'
+  const escribir = () => {
+    alVer(e)
+    navigate(Rutas.chat(e.viajeroUid!), { state: { otroNombre: e.viajeroNombre, encomienda: e } satisfies ArgsChat })
+  }
+  return (
+    <Aviso
+      tipo="exito"
+      titulo={`¡${quien} tomó tu encomienda ${e.ciudadOrigen} → ${e.ciudadDestino}!`}
+      accion={
+        <>
+          <Boton chico ancho={false} icono={MessageCircle} onClick={e.viajeroUid ? escribir : null}>
+            Escribirle
+          </Boton>
+          <Boton
+            chico
+            ancho={false}
+            variante="secundario"
+            onClick={() => navigate(Rutas.detalleEnvio(e.id), { state: { encomienda: e } })}
+          >
+            Ver envío
+          </Boton>
+          <Boton chico ancho={false} variante="secundario" onClick={() => alVer(e)}>
+            Entendido
+          </Boton>
+        </>
+      }
+    >
+      Coordinen por chat dónde y cuándo se la entregas.
+    </Aviso>
+  )
+}
+
+/** Hasta dos avisos sueltos; con más, uno que los resume. */
+export function AvisosTomadas() {
+  const navigate = useNavigate()
+  const { nuevas, marcarVistas } = useNuevasTomadas()
+  if (nuevas.length === 0) return null
+  if (nuevas.length <= 2) return <>{nuevas.map((e) => <AvisoTomada key={e.id} e={e} alVer={marcarVistas} />)}</>
+  return (
+    <Aviso
+      tipo="exito"
+      titulo={`¡Viajeros tomaron ${nuevas.length} de tus encomiendas!`}
+      accion={
+        <>
+          <Boton chico ancho={false} onClick={() => navigate(Rutas.envios)}>
+            Ver envíos
+          </Boton>
+          <Boton chico ancho={false} variante="secundario" onClick={() => marcarVistas(...nuevas)}>
+            Entendido
+          </Boton>
+        </>
+      }
+    >
+      Escríbeles por chat para coordinar la entrega.
+    </Aviso>
+  )
+}
+
+/** Línea de tiempo: Publicada → Tomada por un viajero → Entregada → Calificada. */
 export function LineaTiempo({ estado, calificada }: { estado: EstadoEncomienda; calificada: boolean }) {
   const actual = pasoActual(estado, calificada)
   if (actual === null) {

@@ -117,6 +117,20 @@ export const Local = {
     cambio()
   },
 
+  /** Último estado visto de cada encomienda del remitente (`id → estado`), para avisar cuando
+   *  un viajero la toma (docs/11 §2G). `null` si nunca se guardó. */
+  estadosVistos(uid: string): Record<string, string> | null {
+    const m = leerJson(`remitente_estados_vistos_${uid}`)
+    if (!esMapa(m)) return null
+    return Object.fromEntries(Object.entries(m).filter((par): par is [string, string] => typeof par[1] === 'string'))
+  },
+  guardarEstadosVistos(uid: string, vistos: Record<string, string>): void {
+    const nuevo = JSON.stringify(vistos)
+    if (leer(`remitente_estados_vistos_${uid}`) === nuevo) return
+    guardar(`remitente_estados_vistos_${uid}`, nuevo)
+    cambio()
+  },
+
   /** Preferencias propias de la PWA (no existen en Flutter). */
   leer,
   guardar,

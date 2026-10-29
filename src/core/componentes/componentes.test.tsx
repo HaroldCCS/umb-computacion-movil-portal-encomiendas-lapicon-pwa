@@ -190,7 +190,9 @@ describe('Toasts', () => {
 describe('piezas de la interfaz', () => {
   it('insignia: color + ícono + texto, y se lee el estado', () => {
     render(<InsigniaEncomienda estado="tomada" />)
-    expect(screen.getByRole('img', { name: 'Estado: En camino' })).toBeInTheDocument()
+    expect(screen.getByRole('img', { name: 'Estado: Tomada' })).toBeInTheDocument()
+    render(<InsigniaEncomienda estado="tomada" rol="viajero" />)
+    expect(screen.getByRole('img', { name: 'Estado: La llevas tú' })).toBeInTheDocument()
   })
 
   it('avatar: iniciales y tono estable', () => {

@@ -148,7 +148,9 @@ export default function ChatPantalla() {
             origen={encomienda.ciudadOrigen}
             destino={encomienda.ciudadDestino}
             compacto
-            extremo={<InsigniaEncomienda estado={encomienda.estado} />}
+            extremo={
+              <InsigniaEncomienda estado={encomienda.estado} rol={encomienda.viajeroUid === miUid ? 'viajero' : 'remitente'} />
+            }
           />
         </div>
       )}

@@ -1,6 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { CircleMinus, MessageCircle, Package, Star } from 'lucide-react'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useCalificadas, useRepos, useUid } from '../../app/contexto'
 import { Aviso, ErrorCarga, EsqueletoLista, Vacio } from '../../core/componentes/Aviso'
@@ -19,7 +19,7 @@ import { conEstado, type Encomienda } from '../../datos/modelos/encomienda'
 import { esFinalizada } from '../../datos/modelos/estado'
 import type { ArgsCalificar } from '../calificaciones/pantallas'
 import type { ArgsChat } from '../chat/ChatPantalla'
-import { FilaConfianza, LineaTiempo, TicketEnvio, useEncomiendaDeRuta } from './componentes'
+import { FilaConfianza, LineaTiempo, TicketEnvio, useEncomiendaDeRuta, useNuevasTomadas } from './componentes'
 
 /**
  * Detalle de una encomienda del remitente. La acción principal va fija abajo;
@@ -56,6 +56,13 @@ function Detalle({ inicial }: { inicial: Encomienda }) {
   const e = cambiada ?? inicial
   const calificada = useCalificadas().has(e.id)
   const { cargando, error, ejecutar } = useAccion()
+  const { marcarVistas } = useNuevasTomadas()
+  // Abrir el detalle cuenta como haber visto el aviso de "te la tomaron".
+  useEffect(() => {
+    if (e.estado === 'tomada') marcarVistas(e)
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- solo al cambiar de encomienda o de estado
+  }, [e.id, e.estado])
+  const quien = e.viajeroNombre ?? 'Un viajero'
 
   /** Irreversible: se confirma escribiendo RETIRAR. */
   const retirar = async () => {
@@ -147,12 +154,25 @@ function Detalle({ inicial }: { inicial: Encomienda }) {
       }
     >
       <TicketEnvio e={e} />
+      {/* Con viajero: lo primero que se ve es quién la lleva (docs/11 §2G). */}
+      {e.estado === 'tomada' && e.viajeroUid && (
+        <Grupo titulo="Quién la lleva">
+          <div className="flex flex-col gap-3 p-4">
+            <FilaConfianza uid={e.viajeroUid} nombre={e.viajeroNombre} />
+            <Boton chico ancho={false} variante="tonal" icono={MessageCircle} onClick={abrirChat}>
+              Escribirle
+            </Boton>
+          </div>
+        </Grupo>
+      )}
       <Grupo
         titulo="Estado"
         pie={
           e.estado === 'disponible'
             ? 'Cuando un viajero de tu ruta la tome, te avisaremos aquí y podrán coordinar por chat.'
-            : null
+            : e.estado === 'tomada'
+              ? `${quien} aceptó llevarla. Coordinen por chat dónde y cuándo se la entregas.`
+              : null
         }
       >
         <div className="px-4 pt-4">
@@ -167,8 +187,8 @@ function Detalle({ inicial }: { inicial: Encomienda }) {
       <Grupo titulo="Qué envías">
         <p className="p-4 text-[17px] leading-[1.4] text-texto">{e.observaciones || 'Sin descripción'}</p>
       </Grupo>
-      {e.viajeroUid && (
-        <Grupo titulo="Quién la lleva">
+      {e.viajeroUid && e.estado !== 'tomada' && (
+        <Grupo titulo="Quién la llevó">
           <div className="p-4">
             <FilaConfianza uid={e.viajeroUid} nombre={e.viajeroNombre} />
           </div>

@@ -7,11 +7,21 @@ export type EstadoEncomienda = 'disponible' | 'tomada' | 'entregada' | 'recibida
 
 export const ETIQUETA_ENCOMIENDA: Record<EstadoEncomienda, string> = {
   disponible: 'Disponible',
-  tomada: 'En camino',
+  tomada: 'Tomada',
   entregada: 'Entregada',
   recibida: 'Recibida',
   vencida: 'Vencida',
   desconocido: 'Sin estado',
+}
+
+/**
+ * Etiqueta según quién mira (docs/11 §2G): `tomada` es "Tomada" para el remitente
+ * (alguien aceptó llevarla) y "La llevas tú" para el viajero que la tomó. El resto no cambia.
+ * `rol = 'viajero'` significa "la llevo yo"; para una tomada por otra persona, usar 'remitente'.
+ */
+export function etiquetaEstado(estado: EstadoEncomienda, rol: 'remitente' | 'viajero'): string {
+  if (estado === 'tomada' && rol === 'viajero') return 'La llevas tú'
+  return ETIQUETA_ENCOMIENDA[estado]
 }
 
 const VALIDOS_ENCOMIENDA = ['disponible', 'tomada', 'entregada', 'recibida', 'vencida', 'desconocido'] as const

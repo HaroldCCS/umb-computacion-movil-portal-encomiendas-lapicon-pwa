@@ -14,7 +14,7 @@ import { useToast } from '../../core/componentes/Toast'
 import { Fmt } from '../../core/formato'
 import { accionDeRuta, Rutas } from '../../core/rutas'
 import { mensajeDe, useAccion } from '../../core/useAccion'
-import { useDisponiblesEnMiRuta, useMisEntregas, useRefrescarViajero } from '../../datos/consultas'
+import { useDisponiblesEnMiRuta, useMiViaje, useMisEntregas, useRefrescarViajero } from '../../datos/consultas'
 import { Local } from '../../datos/local'
 import { conEstado, type Encomienda } from '../../datos/modelos/encomienda'
 import { esFinalizada } from '../../datos/modelos/estado'
@@ -68,6 +68,7 @@ function Detalle({ inicial }: { inicial: Encomienda }) {
   const e = cambiada ?? inicial
   const { cargando, error, ejecutar } = useAccion()
   const calificadas = useCalificadas()
+  const miViaje = useMiViaje()
 
   const mia = tomadaPorMi(e, uid, uid ? Local.idsEntregas(uid) : new Set())
   const sinRemitente = e.remitenteUid === null
@@ -159,12 +160,19 @@ function Detalle({ inicial }: { inicial: Encomienda }) {
     acciones = !mia ? (
       info('Otra persona ya tomó esta encomienda.')
     ) : (
+      // Lo siguiente es coordinar con el remitente; entregar es lo último.
       <div className="flex flex-col gap-2">
-        <Boton icono={CircleCheck} cargando={cargando} textoCargando="Guardando…" onClick={() => void entregar()}>
-          Marcar como entregada
+        <Boton icono={MessageCircle} onClick={sinRemitente || cargando ? null : abrirChat}>
+          Escribir al remitente
         </Boton>
-        <Boton icono={MessageCircle} variante="secundario" onClick={sinRemitente || cargando ? null : abrirChat}>
-          Abrir chat con el remitente
+        <Boton
+          icono={CircleCheck}
+          variante="secundario"
+          cargando={cargando}
+          textoCargando="Guardando…"
+          onClick={() => void entregar()}
+        >
+          Marcar como entregada
         </Boton>
       </div>
     )
@@ -211,12 +219,22 @@ function Detalle({ inicial }: { inicial: Encomienda }) {
         </AccionResaltada>
       }
     >
+      {/* Fijo, no un toast: que no quede duda de que la tomó y de qué sigue (docs/11 §2G). */}
+      {mia && e.estado === 'tomada' && (
+        <Aviso tipo="exito" titulo="Tú llevas esta encomienda">
+          <ol className="mt-1 list-decimal pl-5">
+            <li>Escríbele a {e.remitenteNombre ?? 'quien la publicó'} para recibir el paquete.</li>
+            <li>Llévalo en tu viaje{miViaje.data?.numeroVuelo ? ` ${miViaje.data.numeroVuelo}` : ''}.</li>
+            <li>Al entregarlo, márcala como entregada.</li>
+          </ol>
+        </Aviso>
+      )}
       <RouteTicket
         origen={e.ciudadOrigen}
         destino={e.ciudadDestino}
         acento="viajero"
         detalles={e.fechaVencimiento ? [<TicketDetail key="v" etiqueta="Vence" valor={Fmt.fecha(e.fechaVencimiento)} />] : []}
-        extremo={<InsigniaEncomienda estado={e.estado} />}
+        extremo={<InsigniaEncomienda estado={e.estado} rol={mia ? 'viajero' : 'remitente'} />}
       />
       <Grupo titulo="Lo que te pagan">
         <p className="display p-4 text-[32px] text-texto">

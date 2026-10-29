@@ -11,9 +11,9 @@ import { RouteTicket, TicketDetail } from '../../core/componentes/RouteTicket'
 import { Fmt } from '../../core/formato'
 import { Rutas } from '../../core/rutas'
 import { mensajeDe } from '../../core/useAccion'
-import { Claves, useDisponiblesEnMiRuta, useMiViaje } from '../../datos/consultas'
+import { Claves, useDisponiblesEnMiRuta, useMiViaje, useMisEntregas } from '../../datos/consultas'
 import { TicketEncomienda, useAbrirEncomiendaViajero } from './componentes'
-import { ordenarDisponibles, TITULO_ORDEN, type OrdenExplorar } from './logica'
+import { ordenarDisponibles, porEntregar, TITULO_ORDEN, type OrdenExplorar } from './logica'
 
 /** Pestaña "Explorar": encomiendas disponibles en la ruta de mi viaje, con
  *  lo que pagan a la vista. */
@@ -23,6 +23,7 @@ export function Explorar() {
   const uid = useUid()
   const viaje = useMiViaje()
   const disponibles = useDisponiblesEnMiRuta()
+  const llevo = porEntregar(useMisEntregas().data ?? [])
   const abrir = useAbrirEncomiendaViajero()
   const [orden, setOrden] = useState<OrdenExplorar>('recientes')
   const v = viaje.data
@@ -60,9 +61,20 @@ export function Explorar() {
         ]}
       />
     )
+    // Las que tomé van aparte y arriba, para no confundirlas con las disponibles (docs/11 §2G).
+    const lasQueLlevo =
+      llevo.length > 0
+        ? [
+            <h2 key="llevo-titulo" className="text-xl font-bold tracking-[-0.3px] text-texto">
+              Las que llevas
+            </h2>,
+            ...llevo.map((e) => <TicketEncomienda key={`llevo-${e.id}`} e={e} onClick={() => abrir(e)} />),
+          ]
+        : []
     if (disponibles.isError) {
       contenido = [
         ruta,
+        ...lasQueLlevo,
         <Aviso
           key="error"
           tipo="error"
@@ -76,10 +88,11 @@ export function Explorar() {
         </Aviso>,
       ]
     } else if (!disponibles.data) {
-      contenido = [ruta, <EsqueletoLista key="carga" cantidad={2} />]
+      contenido = [ruta, ...lasQueLlevo, <EsqueletoLista key="carga" cantidad={2} />]
     } else if (disponibles.data.length === 0) {
       contenido = [
         ruta,
+        ...lasQueLlevo,
         <Vacio
           key="vacio"
           titulo="Aún no hay encomiendas para esta ruta"
@@ -91,6 +104,7 @@ export function Explorar() {
       const n = disponibles.data.length
       contenido = [
         ruta,
+        ...lasQueLlevo,
         <h2 key="titulo" className="text-xl font-bold tracking-[-0.3px] text-texto">
           {n} {n === 1 ? 'encomienda disponible' : 'encomiendas disponibles'}
         </h2>,

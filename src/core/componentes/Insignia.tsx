@@ -11,10 +11,11 @@ import {
   PlaneTakeoff,
   Star,
   StarHalf,
+  UserCheck,
   type LucideIcon,
 } from 'lucide-react'
 import type { CSSProperties } from 'react'
-import { ETIQUETA_ENCOMIENDA, ETIQUETA_VIAJE, type EstadoEncomienda, type EstadoViaje } from '../../datos/modelos/estado'
+import { ETIQUETA_VIAJE, etiquetaEstado, type EstadoEncomienda, type EstadoViaje } from '../../datos/modelos/estado'
 import { Fmt } from '../formato'
 
 export type TipoInsignia = 'exito' | 'atencion' | 'peligro' | 'info' | 'neutra'
@@ -60,9 +61,12 @@ const ENCOMIENDA: Record<EstadoEncomienda, [LucideIcon, TipoInsignia]> = {
   desconocido: [CircleHelp, 'neutra'],
 }
 
-export function InsigniaEncomienda({ estado }: { estado: EstadoEncomienda }) {
-  const [icono, tipo] = ENCOMIENDA[estado]
-  const t = ETIQUETA_ENCOMIENDA[estado]
+/** `rol` = quién mira: con `tomada`, el remitente ve "Tomada" (persona que la aceptó) y el
+ *  viajero que la lleva, "La llevas tú" (maleta). */
+export function InsigniaEncomienda({ estado, rol = 'remitente' }: { estado: EstadoEncomienda; rol?: 'remitente' | 'viajero' }) {
+  const [iconoBase, tipo] = ENCOMIENDA[estado]
+  const icono = estado === 'tomada' && rol === 'remitente' ? UserCheck : iconoBase
+  const t = etiquetaEstado(estado, rol)
   return <Insignia texto={t} icono={icono} tipo={tipo} semantica={`Estado: ${t}`} />
 }
 

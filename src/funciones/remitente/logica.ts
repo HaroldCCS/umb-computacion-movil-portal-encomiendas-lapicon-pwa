@@ -38,7 +38,7 @@ export function agruparEnvios(lista: Encomienda[]): Record<PestanaEnvios, Encomi
 }
 
 /** Pasos de la línea de tiempo del detalle. */
-export const PASOS_ENCOMIENDA = ['Publicada', 'Tomada', 'Entregada', 'Calificada'] as const
+export const PASOS_ENCOMIENDA = ['Publicada', 'Tomada por un viajero', 'Entregada', 'Calificada'] as const
 
 /** Paso actual (0..3) o `null` si es terminal sin entrega (vencida). */
 export function pasoActual(estado: EstadoEncomienda, calificada = false): number | null {
@@ -94,7 +94,8 @@ export function validarRuta(origen: string, destino: string): string | null {
 
 /** Lo que muestra el Inicio del remitente (docs/08 §8.4). */
 export interface ResumenEnvios {
-  enCamino: number
+  /** Activas que ya tienen viajero (`tomada`). */
+  tomadas: number
   disponibles: number
   entregadas: number
   porCalificar: Encomienda[]
@@ -104,9 +105,9 @@ export interface ResumenEnvios {
 
 export function resumenEnvios(lista: Encomienda[], calificadas: Set<string>): ResumenEnvios {
   const g = agruparEnvios(lista)
-  const enCamino = g.activas.filter((e) => e.estado === 'tomada').length
+  const tomadas = g.activas.filter((e) => e.estado === 'tomada').length
   const disponibles = g.activas.filter((e) => e.estado === 'disponible').length
-  const activas = enCamino + disponibles
+  const activas = tomadas + disponibles
   // Solo se puede calificar si se sabe quién la llevó.
   const porCalificar = g.entregadas.filter((e) => e.viajeroUid !== null && !calificadas.has(e.id))
   let nota: string
@@ -115,9 +116,34 @@ export function resumenEnvios(lista: Encomienda[], calificadas: Set<string>): Re
     nota = 'No tienes envíos activos. Publica uno con el botón +.'
   } else {
     const partes: string[] = []
-    if (enCamino > 0) partes.push(`${enCamino} ${enCamino === 1 ? 'va' : 'van'} en camino`)
+    if (tomadas > 0) partes.push(`${tomadas} ${tomadas === 1 ? 'tomada' : 'tomadas'} por un viajero`)
     if (disponibles > 0) partes.push(`${disponibles} ${disponibles === 1 ? 'espera' : 'esperan'} viajero`)
     nota = `${partes.join(' · ')}.`
   }
-  return { enCamino, disponibles, entregadas: g.entregadas.length, porCalificar, activas, nota }
+  return { tomadas, disponibles, entregadas: g.entregadas.length, porCalificar, activas, nota }
+}
+
+/** Último estado visto de cada encomienda (`remitente_estados_vistos_{uid}`); `null` = nunca. */
+export type EstadosVistos = Record<string, string>
+
+/**
+ * Encomiendas que un viajero tomó desde la última vez que el remitente las vio: estaban
+ * `disponible` (o no las conocía) y ahora están `tomada`. La primera vez (sin mapa) no avisa
+ * de nada, para no soltar todo de golpe.
+ */
+export function nuevasTomadas(lista: Encomienda[], vistos: EstadosVistos | null): Encomienda[] {
+  if (vistos === null) return []
+  return lista.filter((e) => e.estado === 'tomada' && (vistos[e.id] === undefined || vistos[e.id] === 'disponible'))
+}
+
+/** El mapa a guardar después de cargar: todo queda como visto, menos las nuevas tomadas,
+ *  que esperan a que el remitente abra el detalle o toque "Entendido". */
+export function actualizarVistos(lista: Encomienda[], vistos: EstadosVistos | null): EstadosVistos {
+  const pendientes = new Set(nuevasTomadas(lista, vistos).map((e) => e.id))
+  const nuevo: EstadosVistos = {}
+  for (const e of lista) {
+    if (!pendientes.has(e.id)) nuevo[e.id] = e.estado
+    else if (vistos?.[e.id] !== undefined) nuevo[e.id] = vistos[e.id]!
+  }
+  return nuevo
 }

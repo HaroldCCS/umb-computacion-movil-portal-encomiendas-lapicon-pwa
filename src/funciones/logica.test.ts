@@ -3,13 +3,15 @@
 import { ApiError, RedError } from '../core/red/errores'
 import { componerComentario, distribucion, etiquetaPuntaje, sugerenciasPara } from '../datos/modelos/calificaciones'
 import { conEstado, encomiendaAJson, encomiendaDesdeJson, type Encomienda } from '../datos/modelos/encomienda'
-import type { EstadoEncomienda } from '../datos/modelos/estado'
+import { etiquetaEstado, type EstadoEncomienda } from '../datos/modelos/estado'
 import { idChat } from '../datos/repositorios'
 import { estadoInicial, esNueva, mensajeErrorAsistente, reducirAsistente, sugerenciasAsistente } from './asistente/logica'
 import { agruparPorDia, conversacionDesdeMapa, inicialesDe, mensajeDesdeMapa, nombreDe, ordenarConversaciones, otroUid, type MensajeChat } from './chat/modelos'
 import { mensajeErrorChat } from './chat/servicio'
 import {
+  actualizarVistos,
   agruparEnvios,
+  nuevasTomadas,
   formatearMiles,
   parseValor,
   pasoActual,
@@ -105,10 +107,39 @@ describe('remitente', () => {
       e('6', { estado: 'entregada' }), // sin viajero conocido: no se puede calificar
     ]
     const r = resumenEnvios(lista, new Set(['5']))
-    expect([r.enCamino, r.disponibles, r.activas, r.entregadas]).toEqual([1, 2, 3, 3])
+    expect([r.tomadas, r.disponibles, r.activas, r.entregadas]).toEqual([1, 2, 3, 3])
     expect(r.porCalificar.map((x) => x.id)).toEqual(['4'])
-    expect(r.nota).toBe('1 va en camino · 2 esperan viajero.')
+    expect(r.nota).toBe('1 tomada por un viajero · 2 esperan viajero.')
     expect(resumenEnvios([], new Set()).nota).toBe('No tienes envíos activos. Publica uno con el botón +.')
+  })
+
+  it('etiquetaEstado: "tomada" depende de quién mira; lo demás no cambia', () => {
+    expect(etiquetaEstado('tomada', 'remitente')).toBe('Tomada')
+    expect(etiquetaEstado('tomada', 'viajero')).toBe('La llevas tú')
+    for (const rol of ['remitente', 'viajero'] as const) {
+      expect(etiquetaEstado('disponible', rol)).toBe('Disponible')
+      expect(etiquetaEstado('entregada', rol)).toBe('Entregada')
+    }
+  })
+
+  it('nuevas tomadas con remitente_estados_vistos: avisa una vez y solo de lo nuevo', () => {
+    const a = e('a', { estado: 'disponible' })
+    const tomadaA = e('a', { estado: 'tomada', viajero: 'v' })
+    const b = e('b', { estado: 'tomada', viajero: 'v' })
+    // Primera vez sin mapa: no avisa nada de golpe y lo guarda todo como visto.
+    expect(nuevasTomadas([a, b], null)).toEqual([])
+    const base = actualizarVistos([a, b], null)
+    expect(base).toEqual({ a: 'disponible', b: 'tomada' })
+    // disponible → tomada: avisa; b ya se había visto tomada: no.
+    expect(nuevasTomadas([tomadaA, b], base).map((x) => x.id)).toEqual(['a'])
+    // Mientras no la vea, sigue pendiente aunque se recargue.
+    const recargado = actualizarVistos([tomadaA, b], base)
+    expect(recargado).toEqual({ a: 'disponible', b: 'tomada' })
+    expect(nuevasTomadas([tomadaA, b], recargado).map((x) => x.id)).toEqual(['a'])
+    // Ya vista (detalle o "Entendido"): no avisa más.
+    expect(nuevasTomadas([tomadaA, b], { ...recargado, a: 'tomada' })).toEqual([])
+    // Publicada desde otro dispositivo y ya tomada: también es nueva.
+    expect(nuevasTomadas([e('c', { estado: 'tomada', viajero: 'v' })], base).map((x) => x.id)).toEqual(['c'])
   })
 
   it('conEstado conserva los demás datos', () => {

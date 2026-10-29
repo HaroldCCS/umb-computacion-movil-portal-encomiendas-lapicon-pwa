@@ -1,5 +1,5 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { CircleCheck, Clock, Earth, Headset, Luggage, Package, Plus, Star } from 'lucide-react'
+import { CircleCheck, Clock, Earth, Headset, Package, Plus, Star, UserCheck } from 'lucide-react'
 import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useCalificadas, useSesion } from '../../app/contexto'
@@ -15,6 +15,7 @@ import { Claves, useMisEncomiendas } from '../../datos/consultas'
 import type { Encomienda } from '../../datos/modelos/encomienda'
 import { Vocabulario } from '../../datos/modelos/rol'
 import { nombreCompleto } from '../../datos/modelos/usuario'
+import { AvisosTomadas } from './componentes'
 import { resumenEnvios } from './logica'
 
 /** Como mucho dos avisos sueltos; si hay más, uno que los resume. */
@@ -58,6 +59,8 @@ export function InicioRemitente() {
     const v = Vocabulario.remitente
     contenido = (
       <Bloques>
+        {/* Arriba de todo: un viajero tomó una encomienda (docs/11 §2G). */}
+        <AvisosTomadas />
         {/* Sin ningún envío, la tarjeta en cero no aporta: basta la invitación. */}
         {lista.length > 0 && (
           <TarjetaHero
@@ -69,7 +72,7 @@ export function InicioRemitente() {
             onClick={() => irAEnvios('activas')}
             subTarjetas={
               <>
-                <SubTarjetaVidrio etiqueta="En camino" icono={Luggage} valor={r.enCamino} />
+                <SubTarjetaVidrio etiqueta="Tomadas" icono={UserCheck} valor={r.tomadas} />
                 <SubTarjetaVidrio etiqueta="Disponibles" icono={Clock} tono="vidrio-ambar" valor={r.disponibles} />
               </>
             }

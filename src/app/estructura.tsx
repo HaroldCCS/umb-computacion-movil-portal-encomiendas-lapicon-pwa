@@ -9,6 +9,7 @@ import { Progreso } from '../core/componentes/Insignia'
 import { redirigirPara, Rutas } from '../core/rutas'
 import { useMiViaje, useMisEncomiendas, useMisEntregas } from '../datos/consultas'
 import { Vocabulario, type Rol } from '../datos/modelos/rol'
+import { useNuevasTomadas } from '../funciones/remitente/componentes'
 import { resumenEnvios } from '../funciones/remitente/logica'
 import { porEntregar } from '../funciones/viajero/logica'
 import { useCalificadas, useSesion } from './contexto'
@@ -87,6 +88,11 @@ function ItemsRemitente() {
   const envios = useMisEncomiendas()
   const calificadas = useCalificadas()
   const porCalificar = envios.data ? resumenEnvios(envios.data, calificadas).porCalificar.length : 0
+  const nuevas = useNuevasTomadas().nuevas.length
+  const etiquetas = [
+    nuevas > 0 ? `${nuevas} ${nuevas === 1 ? 'nueva' : 'nuevas'}` : null,
+    porCalificar > 0 ? `${porCalificar} por calificar` : null,
+  ].filter(Boolean)
   return (
     <BarraPestanas
       items={[
@@ -95,8 +101,8 @@ function ItemsRemitente() {
           ruta: Rutas.envios,
           texto: 'Envíos',
           icono: Package,
-          contador: porCalificar,
-          etiquetaContador: `${porCalificar} por calificar`,
+          contador: nuevas + porCalificar,
+          etiquetaContador: etiquetas.join(' · '),
         },
         CHATS,
         PERFIL,
