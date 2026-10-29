@@ -1,20 +1,20 @@
 import { useQueryClient } from '@tanstack/react-query'
-import { CircleDot, Earth, PlaneTakeoff, Plus } from 'lucide-react'
+import { ArrowUpDown, CircleDot, Earth, MapPin, PlaneTakeoff, Plus } from 'lucide-react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { ErrorCarga, EsqueletoLista, Vacio } from '../../core/componentes/Aviso'
-import { Boton } from '../../core/componentes/Boton'
-import { InsigniaViaje } from '../../core/componentes/Insignia'
+import { Boton, BotonIcono } from '../../core/componentes/Boton'
 import { Pantalla } from '../../core/componentes/Pantalla'
 import { RouteTicket, TicketDetail } from '../../core/componentes/RouteTicket'
 import { Fmt } from '../../core/formato'
 import { Rutas } from '../../core/rutas'
 import { mensajeDe } from '../../core/useAccion'
-import { Claves, useViajerosPorOrigen } from '../../datos/consultas'
+import { Claves, useViajerosEnRuta } from '../../datos/consultas'
 import type { Viaje } from '../../datos/modelos/viaje'
 import { CampoCiudad } from '../catalogo/selectores'
 import { FilaConfianza } from './componentes'
 
-/** Viajero con su calificación arriba y el pase de su vuelo debajo. */
+/** Viajero con su nombre y calificación arriba y el pase de su viaje debajo
+ *  (`viajes/disponibles` no trae el número de vuelo). */
 function TarjetaViajero({ v }: { v: Viaje }) {
   return (
     <div className="flex flex-col">
@@ -28,32 +28,33 @@ function TarjetaViajero({ v }: { v: Viaje }) {
         destino={v.ciudadDestino}
         compacto
         acento="viajero"
-        detalles={[
-          <TicketDetail key="v" etiqueta="Vuelo" valor={v.numeroVuelo || '—'} />,
-          <TicketDetail key="f" etiqueta="Fecha" valor={Fmt.fecha(v.fechaViaje, { corta: true })} />,
-        ]}
-        extremo={<InsigniaViaje estado={v.estado} />}
+        detalles={[<TicketDetail key="f" etiqueta="Viaja el" valor={Fmt.fecha(v.fechaViaje, { corta: true })} />]}
       />
     </div>
   )
 }
 
-/** "Buscar viajeros" (desde Vista rápida): quién sale de una ciudad y cómo lo califican.
- *  La ciudad va en la URL (`?ciudad=`) para poder volver o compartir la búsqueda. */
+/** "Buscar viajeros" (desde Vista rápida): quién viaja por tu ruta completa, con nombre y
+ *  calificación (`GET /api/viajes/disponibles`, docs/11 §2C). La ruta va en la URL
+ *  (`?origen=&destino=`) para poder volver o compartir la búsqueda. */
 export function BuscarViajeros() {
   const [params, setParams] = useSearchParams()
-  const ciudad = params.get('ciudad')
+  const origen = params.get('origen')
+  const destino = params.get('destino')
   const navigate = useNavigate()
   const qc = useQueryClient()
-  const viajeros = useViajerosPorOrigen(ciudad)
+  const viajeros = useViajerosEnRuta(origen, destino)
+  const cambiar = (o: string | null, d: string | null) =>
+    setParams({ ...(o ? { origen: o } : {}), ...(d ? { destino: d } : {}) }, { replace: true })
+  const ruta = `${origen} → ${destino}`
 
   let resultados
-  if (!ciudad) {
+  if (!origen || !destino) {
     resultados = (
       <Vacio
         titulo="Encuentra quién viaja"
         icono={Earth}
-        texto="Elige tu ciudad para ver los viajeros que salen de allí y sus calificaciones."
+        texto="Elige de dónde a dónde envías para ver los viajeros de esa ruta y sus calificaciones."
       />
     )
   } else if (viajeros.isError) {
@@ -63,9 +64,9 @@ export function BuscarViajeros() {
   } else if (viajeros.data.length === 0) {
     resultados = (
       <Vacio
-        titulo={`Nadie viaja desde ${ciudad} por ahora`}
+        titulo={`Nadie viaja ${ruta} por ahora`}
         icono={PlaneTakeoff}
-        texto={`Publica tu encomienda igual: los viajeros que registren un vuelo desde ${ciudad} la verán.`}
+        texto="Publica tu encomienda igual: los viajeros que registren un vuelo en esa ruta la verán."
         accion={
           <Boton icono={Plus} onClick={() => navigate(Rutas.nuevaEncomienda)}>
             Publicar encomienda
@@ -74,23 +75,35 @@ export function BuscarViajeros() {
       />
     )
   } else {
-    resultados = viajeros.data.map((v) => <TarjetaViajero key={v.id || v.viajeroUid} v={v} />)
+    resultados = viajeros.data.map((v, i) => <TarjetaViajero key={v.viajeroUid ?? i} v={v} />)
   }
 
   return (
     <Pantalla
       titulo="Buscar viajeros"
       atras="Inicio"
-      subtitulo="Mira quién sale de tu ciudad y cómo lo califican."
-      alActualizar={ciudad ? () => qc.invalidateQueries({ queryKey: Claves.viajeros(ciudad) }) : undefined}
+      subtitulo="Mira quién viaja por tu ruta y cómo lo califican."
+      alActualizar={
+        origen && destino ? () => qc.invalidateQueries({ queryKey: Claves.viajeros(origen, destino) }) : undefined
+      }
       cabecera={
         <div className="px-4">
           <CampoCiudad
             etiqueta="¿Desde dónde envías?"
-            valor={ciudad ?? ''}
-            alCambiar={(c) => setParams({ ciudad: c }, { replace: true })}
+            valor={origen ?? ''}
+            alCambiar={(c) => cambiar(c, destino)}
             pista="Elige la ciudad de origen"
             icono={CircleDot}
+          />
+          <div className="flex justify-end">
+            <BotonIcono icono={ArrowUpDown} etiqueta="Intercambiar origen y destino" borde={false} onClick={() => cambiar(destino, origen)} />
+          </div>
+          <CampoCiudad
+            etiqueta="¿A dónde?"
+            valor={destino ?? ''}
+            alCambiar={(c) => cambiar(origen, c)}
+            pista="Elige la ciudad de destino"
+            icono={MapPin}
           />
         </div>
       }

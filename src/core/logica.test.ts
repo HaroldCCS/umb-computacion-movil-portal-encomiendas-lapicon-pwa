@@ -3,6 +3,19 @@ import { Fmt, fechaIso, sumarMeses } from './formato'
 import { accionDeRuta, conAccion, redirigirPara, Rutas } from './rutas'
 import { Validadores } from './validadores'
 
+describe('Validadores.fechaNacimiento', () => {
+  const hoy = new Date(2026, 9, 28)
+  it('es opcional, pide mayoría de edad y una fecha con sentido', () => {
+    expect(Validadores.fechaNacimiento('', hoy)).toBeNull()
+    expect(Validadores.fechaNacimiento('2000-05-20', hoy)).toBeNull()
+    expect(Validadores.fechaNacimiento('2008-10-28', hoy)).toBeNull() // cumple 18 hoy
+    expect(Validadores.fechaNacimiento('2008-10-29', hoy)).toBe('Debes ser mayor de edad para usar Lapticon.')
+    expect(Validadores.fechaNacimiento('2027-01-01', hoy)).toBe('Revisa la fecha de nacimiento.')
+    expect(Validadores.fechaNacimiento('1890-01-01', hoy)).toBe('Revisa la fecha de nacimiento.')
+    expect(Validadores.fechaNacimiento('2000-02-31', hoy)).toBe('Revisa la fecha de nacimiento.')
+  })
+})
+
 describe('Validadores.email', () => {
   it('acepta correos válidos', () => {
     expect(Validadores.email('test30@gmail.com')).toBeNull()

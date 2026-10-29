@@ -99,7 +99,7 @@ interface PropsCampo {
   pista?: string
   ayuda?: string
   icono?: LucideIcon
-  tipo?: 'text' | 'email' | 'tel' | 'password' | 'search'
+  tipo?: 'text' | 'email' | 'tel' | 'password' | 'search' | 'date'
   modoTeclado?: HTMLAttributes<HTMLInputElement>['inputMode']
   autocompletar?: string
   teclaEnter?: 'next' | 'done' | 'send' | 'search' | 'go'

@@ -206,6 +206,45 @@ describe('repositorios (endpoints de la matriz §10.5)', () => {
     })
   })
 
+  it('estado del chat (28-oct): activo, cerrado con fecha y 404 = abierto', async () => {
+    const { r } = repos({
+      'GET /api/chats/estado/a_b': [200, respuesta('fase0_chats_estado_200.json').respuesta],
+      'GET /api/chats/estado/a_c': [200, respuesta('fase0_chats_estado_tras_entregada.json').respuesta],
+      'GET /api/chats/estado/c_a': [404, respuesta('fase0_chats_estado_orden_inverso_404.json').respuesta],
+    })
+    expect(await r.chats.detalleEstado('a_b')).toEqual({ estado: 'abierto', fechaCierre: null })
+    expect(await r.chats.detalleEstado('a_c')).toEqual({
+      estado: 'cerrado',
+      fechaCierre: new Date('2026-10-29T00:46:00.283Z'),
+    })
+    expect(await r.chats.estado('c_a')).toBe('abierto')
+  })
+
+  it('perfil: fechaNacimiento opcional y nunca uid ni email en el cuerpo', async () => {
+    const { r, llamadas } = repos({ 'PUT /api/users/u1': [200, { message: 'ok', user: { uid: 'u1', nombre: 'Ana' } }] })
+    const base = usuarioDesdeJson({ uid: 'u1', nombre: 'Ana', apellido: 'G', telefono: '300', nacionalidad: 'Peru', email: 'a@b.co' })
+    await r.usuarios.actualizar({ ...base, fechaNacimiento: '2000-05-20' })
+    await r.usuarios.actualizar(base)
+    const [con, sin] = llamadas.map((l) => JSON.parse(String(l.init.body)) as Record<string, unknown>)
+    expect(con).toEqual({ nombre: 'Ana', apellido: 'G', telefono: '300', nacionalidad: 'Peru', fechaNacimiento: '2000-05-20' })
+    expect(sin).not.toHaveProperty('fechaNacimiento')
+    for (const c of [con, sin]) {
+      expect(c).not.toHaveProperty('uid')
+      expect(c).not.toHaveProperty('email')
+    }
+    expect(usuarioDesdeJson({ user: { uid: 'x', fechaNacimiento: '1999-01-31T00:00:00.000Z' } }).fechaNacimiento).toBe('1999-01-31')
+  })
+
+  it('viajeros en ruta: pública, con nombre y uid', async () => {
+    const { r, llamadas } = repos({
+      'GET /api/viajes/disponibles': [200, respuesta('fase0_viajes_disponibles_publica.json').respuesta],
+    })
+    const v = await r.viajes.disponiblesEnRuta('Bogota', 'Miami')
+    expect(v.map((x) => [x.viajeroUid, x.viajeroNombre])).toContainEqual(['IeMGfjHQ7XTc0W08QrTzx1flvo13', 'Harold Viajero'])
+    expect((llamadas[0]!.init.headers as Record<string, string>).Authorization).toBeUndefined()
+    expect(llamadas[0]!.url).toBe('/api/viajes/disponibles?ciudadOrigen=Bogota&ciudadDestino=Miami')
+  })
+
   it('vuelos, estado del chat y chatbot: el 500 del servidor se maneja como en Flutter', async () => {
     const { r } = repos({
       'GET /api/vuelos/AV10/2026-12-01': [500, respuesta('vuelos_get.json').respuesta],

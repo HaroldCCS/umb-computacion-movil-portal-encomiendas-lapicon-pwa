@@ -60,7 +60,7 @@ export default function ChatPantalla() {
   const mensajes = useMensajes(servicio, chatId)
   const estado = useQuery({
     queryKey: ['chat-estado', chatId],
-    queryFn: () => repos.chats.estado(chatId!),
+    queryFn: () => repos.chats.detalleEstado(chatId!),
     enabled: chatId !== null,
   })
   const [enviando, setEnviando] = useState(false)
@@ -69,7 +69,8 @@ export default function ChatPantalla() {
 
   const nombreOtro = state?.otroNombre?.trim() || 'Chat'
   const encomienda = state?.encomienda
-  const cerrado = cerradoAlEnviar || estado.data === 'cerrado'
+  const cerrado = cerradoAlEnviar || estado.data?.estado === 'cerrado'
+  const fechaCierre = estado.data?.fechaCierre ?? null
 
   if (!miUid || !otroUid) {
     return (
@@ -186,7 +187,16 @@ export default function ChatPantalla() {
           <Aviso tipo="error">{error}</Aviso>
         </div>
       )}
-      <Compositor cerrado={cerrado} enviando={enviando} alEnviar={enviar} />
+      <Compositor
+        cerrado={cerrado}
+        enviando={enviando}
+        alEnviar={enviar}
+        textoCerrado={
+          fechaCierre
+            ? `Este chat se cerró el ${Fmt.fecha(fechaCierre)}, cuando la encomienda se marcó como entregada.`
+            : undefined
+        }
+      />
     </PantallaConversacion>
   )
 }

@@ -135,7 +135,10 @@ async function responder(estado: EstadoApi, route: Route) {
   })()
   const token = req.headers()['authorization']?.replace(/^Bearer token-falso-/, '') ?? null
   const yo = token && token.startsWith('uid-') ? token : null
-  const publica = ruta.startsWith('/api/ciudades/') || (metodo === 'GET' && ruta.startsWith('/api/ratings/'))
+  const publica =
+    ruta.startsWith('/api/ciudades/') ||
+    ruta.startsWith('/api/vuelos/') ||
+    (metodo === 'GET' && (ruta.startsWith('/api/ratings/') || ruta === '/api/viajes/disponibles'))
   if (!publica && !yo) return json(401, { error: 'Token no proporcionado' })
   const m = (re: RegExp) => re.exec(ruta)
   let x: RegExpExecArray | null
@@ -217,6 +220,17 @@ async function responder(estado: EstadoApi, route: Route) {
     const v = estado.viajes.find((y) => y.uid === yo && y.estado === 'disponible')
     return v ? json(200, v) : json(404, { mensaje: 'No hay viajes disponibles' })
   }
+  if (metodo === 'GET' && ruta === '/api/viajes/disponibles') {
+    // Pública: viajeros con viaje disponible en la ruta, con nombre y apellido (como el real).
+    const o = url.searchParams.get('ciudadOrigen')
+    const d = url.searchParams.get('ciudadDestino')
+    return json(
+      200,
+      estado.viajes
+        .filter((v) => v.estado === 'disponible' && v.ciudadOrigen === o && v.ciudadDestino === d)
+        .map((v) => ({ ciudadOrigen: o, ciudadDestino: d, fechaViaje: v.fechaViaje, nombreUsuario: `${nombreDe(estado, v.uid)} ${estado.usuarios.get(v.uid)?.apellido ?? ''}`.trim(), uid: v.uid })),
+    )
+  }
   if (metodo === 'GET' && ruta === '/api/viajes/buscar') {
     return json(200, estado.viajes.filter((v) => v.ciudadOrigen === url.searchParams.get('ciudad') && v.estado === 'disponible'))
   }
@@ -264,7 +278,15 @@ async function responder(estado: EstadoApi, route: Route) {
   }
 
   // Los dos que hoy fallan en el servidor.
-  if (ruta.startsWith('/api/chats/estado/')) return json(500, { error: 'Error interno del servidor' })
+  if ((x = m(/^\/api\/chats\/estado\/([^/]+)$/))) {
+    // Como el real (28-oct): uids ordenados; activo si el par tiene una tomada, cerrado al entregarla.
+    const par = estado.encomiendas.filter((e) => e.viajeroId && [e.uid, e.viajeroId].sort().join('_') === x![1])
+    if (par.some((e) => e.estado === 'tomada')) return json(200, { estado: 'activo', fechaCierre: null })
+    if (par.some((e) => e.estado === 'entregada' || e.estado === 'recibida')) {
+      return json(200, { estado: 'cerrado', fechaCierre: '2026-10-29T00:46:00.283Z' })
+    }
+    return json(404, { error: 'Chat no encontrado' })
+  }
   if (ruta === '/api/chatbot') {
     return json(500, { error: 'Error al generar respuesta con OpenRouter', detalle: { error: { message: 'User not found.' } } })
   }

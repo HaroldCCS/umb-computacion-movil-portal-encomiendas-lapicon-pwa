@@ -14,6 +14,20 @@ export const Validadores = {
     return null
   },
 
+  /** Fecha de nacimiento opcional (`YYYY-MM-DD`): si se escribe, mayor de edad y con sentido. */
+  fechaNacimiento(valor: string | null | undefined, hoy = new Date()): string | null {
+    const v = valor?.trim() ?? ''
+    if (v === '') return null
+    const [a, m, d] = v.split('-').map(Number)
+    const f = a && m && d ? new Date(a, m - 1, d) : null
+    if (!f || f.getMonth() !== m! - 1) return 'Revisa la fecha de nacimiento.'
+    let edad = hoy.getFullYear() - a!
+    if (hoy.getMonth() < m! - 1 || (hoy.getMonth() === m! - 1 && hoy.getDate() < d!)) edad--
+    if (edad < 0 || edad > 120) return 'Revisa la fecha de nacimiento.'
+    if (edad < 18) return 'Debes ser mayor de edad para usar Lapticon.'
+    return null
+  },
+
   email(valor: string | null | undefined): string | null {
     const v = valor?.trim() ?? ''
     if (v === '') return 'Escribe tu correo.'

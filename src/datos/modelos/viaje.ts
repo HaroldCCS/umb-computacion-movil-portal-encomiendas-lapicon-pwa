@@ -41,7 +41,8 @@ export function viajeDesdeJson(json: unknown): Viaje {
     fechaViaje: leerFecha(m, ['fechaViaje', 'fecha']),
     estado: parseEstadoViaje(m['estado']),
     viajeroUid: uid,
-    viajeroNombre: nombre,
+    // `GET /api/viajes/disponibles` trae el nombre plano en `nombreUsuario`.
+    viajeroNombre: nombre ?? (leerTexto(m, ['nombreUsuario']) || null),
   }
 }
 

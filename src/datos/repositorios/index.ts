@@ -4,7 +4,7 @@ import { Local } from '../local'
 import { resumenDesdeJson, type ResumenCalificaciones } from '../modelos/calificaciones'
 import { cuerpoEncomienda, encomiendaDesdeJson, type Encomienda } from '../modelos/encomienda'
 import type { EstadoChat, EstadoEncomienda } from '../modelos/estado'
-import { desenvolverLista, esMapa, leerTexto, type Mapa } from '../modelos/json'
+import { desenvolverLista, esMapa, leerFecha, leerTexto, type Mapa } from '../modelos/json'
 import type { Rol } from '../modelos/rol'
 import { cuerpoRegistro, perfilCompleto, usuarioDesdeJson, type Usuario } from '../modelos/usuario'
 import { cuerpoViaje, viajeDesdeJson, type Viaje } from '../modelos/viaje'
@@ -85,9 +85,12 @@ export function crearRepositorios(api: ClienteApi) {
         throw e
       }
     },
-    /** Viajeros que salen de `ciudad` (`GET /api/viajes/buscar?ciudad=`). */
-    buscarPorOrigen: async (ciudad: string): Promise<Viaje[]> =>
-      listaViajes(await api.get('/api/viajes/buscar', { query: { ciudad } })),
+    /** Viajeros con viaje disponible en una ruta, con su nombre (`GET /api/viajes/disponibles`,
+     *  pública). Solo trae ruta, fecha, `uid` y `nombreUsuario`: ni vuelo ni estado. */
+    disponiblesEnRuta: async (origen: string, destino: string): Promise<Viaje[]> =>
+      listaViajes(
+        await api.get('/api/viajes/disponibles', { query: { ciudadOrigen: origen, ciudadDestino: destino }, auth: false }),
+      ),
     /** Cancela o cierra mi viaje (`PATCH /api/viajes/{id}/estado`). Después se puede registrar otro.
      *  404 si no es mío. El servidor no revisa si lleva encomiendas: eso lo hace la pantalla. */
     async cambiarEstado(id: string, estado: 'cancelado' | 'completado'): Promise<Viaje | null> {
@@ -98,10 +101,12 @@ export function crearRepositorios(api: ClienteApi) {
     /** `POST /api/viajes`. 400 si ya hay un viaje activo. */
     crear: async (d: Parameters<typeof cuerpoViaje>[0]): Promise<Viaje> =>
       viajeDesdeJson(await api.post('/api/viajes', { cuerpo: cuerpoViaje(d) })),
-    /** Consulta el vuelo (`GET /api/vuelos/:numero/:fecha`). No se usa en la interfaz mientras el
-     *  servidor responda 500 (`RAPIDAPI_KEY`); ver docs/11 §2H. Solo lo prueba `humo`. */
+    /** Consulta el vuelo (`GET /api/vuelos/:numero/:fecha`, pública: sin token). No se usa en la interfaz
+     *  mientras el servidor responda 500 (`RAPIDAPI_KEY`); ver docs/11 §2H. Solo lo prueba `humo`. */
     async validarVuelo(numero: string, fecha: Date): Promise<Mapa> {
-      const json = await api.get(`/api/vuelos/${numero.replaceAll(' ', '').toUpperCase()}/${fechaIso(fecha)}`)
+      const json = await api.get(`/api/vuelos/${numero.replaceAll(' ', '').toUpperCase()}/${fechaIso(fecha)}`, {
+        auth: false,
+      })
       if (esMapa(json)) return json
       if (Array.isArray(json) && esMapa(json[0])) return json[0]
       return {}
@@ -172,15 +177,20 @@ export function crearRepositorios(api: ClienteApi) {
   }
 
   const chats = {
-    /** Abierto/cerrado. 404 o 500 (hoy siempre 500) → abierto: no bloquea el chat. */
-    async estado(id: string): Promise<EstadoChat> {
+    /** `{ estado: activo | cerrado, fechaCierre }` (28-oct). El backend abre el chat del par al tomar
+     *  una encomienda y lo cierra al marcarla entregada. 404 o 500 → abierto: no bloquea el chat. */
+    async detalleEstado(id: string): Promise<{ estado: EstadoChat; fechaCierre: Date | null }> {
       try {
-        return parseEstadoChat(await api.get(`/api/chats/estado/${id}`))
+        const json = await api.get(`/api/chats/estado/${id}`)
+        const estado = parseEstadoChat(json)
+        return { estado, fechaCierre: estado === 'cerrado' && esMapa(json) ? leerFecha(json, ['fechaCierre']) : null }
       } catch (e) {
-        if (e instanceof ApiError && (e.noEncontrado || e.status >= 500)) return 'abierto'
+        if (e instanceof ApiError && (e.noEncontrado || e.status >= 500)) return { estado: 'abierto', fechaCierre: null }
         throw e
       }
     },
+    /** Solo abierto/cerrado (para revisar antes de cada envío). */
+    estado: async (id: string): Promise<EstadoChat> => (await chats.detalleEstado(id)).estado,
   }
 
   const chatbot = {

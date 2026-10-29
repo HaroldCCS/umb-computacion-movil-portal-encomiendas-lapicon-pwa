@@ -1,4 +1,4 @@
-import { ChevronDown, Globe, Phone } from 'lucide-react'
+import { Cake, ChevronDown, Globe, Phone } from 'lucide-react'
 import { useState } from 'react'
 import { Aviso } from '../../core/componentes/Aviso'
 import { Boton } from '../../core/componentes/Boton'
@@ -29,6 +29,7 @@ export function FormularioPerfil({
   const [apellido, setApellido] = useState(inicial?.apellido ?? '')
   const [telefono, setTelefono] = useState(inicial?.telefono ?? '')
   const [nacionalidad, setNacionalidad] = useState(inicial?.nacionalidad || 'Colombia')
+  const [nacimiento, setNacimiento] = useState(inicial?.fechaNacimiento ?? '')
   const { cargando, error, ejecutar } = useAccion()
 
   const enviar = () => {
@@ -41,6 +42,7 @@ export function FormularioPerfil({
         telefono: telefono.replace(/\s/g, ''),
         nacionalidad: nacionalidad.trim(),
         email,
+        fechaNacimiento: nacimiento === '' ? null : nacimiento,
         rol: inicial?.rol ?? null,
         creadoEn: inicial?.creadoEn ?? null,
       }),
@@ -93,6 +95,17 @@ export function FormularioPerfil({
           const p = await elegirPais(nacionalidad)
           if (p) setNacionalidad(p)
         }}
+      />
+      <Campo
+        etiqueta="Fecha de nacimiento (opcional)"
+        valor={nacimiento}
+        alCambiar={setNacimiento}
+        tipo="date"
+        ayuda="Solo para confirmar que eres mayor de edad."
+        autocompletar="bday"
+        icono={Cake}
+        checkValido={false}
+        validador={(v) => Validadores.fechaNacimiento(v)}
       />
       <div className="mt-2 flex flex-col gap-3">
         {error && <Aviso tipo="error">{error}</Aviso>}

@@ -49,6 +49,11 @@ test('cuenta nueva: registro → perfil → rol → inicio vacío', async ({ pag
   await page.getByRole('button', { name: /Colombia/ }).click()
   await page.getByRole('dialog').getByLabel('Buscar país').fill('per')
   await page.getByRole('option', { name: 'Peru' }).click()
+  // Fecha de nacimiento opcional: si se escribe, debe ser mayor de edad (docs/11 §2D).
+  await page.getByLabel('Fecha de nacimiento (opcional)').fill('2015-01-01')
+  await page.getByRole('button', { name: 'Continuar' }).click()
+  await expect(page.getByText('Debes ser mayor de edad para usar Lapticon.')).toBeVisible()
+  await page.getByLabel('Fecha de nacimiento (opcional)').fill('2000-05-20')
   await page.getByRole('button', { name: 'Continuar' }).click()
 
   // Paso 2 de 2: rol.
@@ -58,7 +63,12 @@ test('cuenta nueva: registro → perfil → rol → inicio vacío', async ({ pag
   await expect(page).toHaveURL(/\/inicio$/)
   await expect(page.getByRole('heading', { name: 'Hola, Laura' })).toBeVisible()
   await expect(page.getByText('Aún no has enviado nada')).toBeVisible()
-  expect(estado.usuarios.get(uidDe('nueva@prueba.co'))).toMatchObject({ nacionalidad: 'Peru', telefono: '3001234567' })
+  expect(estado.usuarios.get(uidDe('nueva@prueba.co'))).toMatchObject({
+    nacionalidad: 'Peru',
+    telefono: '3001234567',
+    fechaNacimiento: '2000-05-20',
+  })
+  expect(estado.usuarios.get(uidDe('nueva@prueba.co'))).not.toHaveProperty('email')
   expect(await sinDesborde(page)).toBe(true)
 })
 
@@ -121,12 +131,13 @@ test('de punta a punta: publicar, tomar, entregar y calificar (dos personas)', a
 
   // Remitente: al entrar ve el aviso de que se la tomaron, sin tocar nada.
   await ana.reload()
-  await expect(ana.getByText('¡Un viajero tomó tu encomienda Bogota → Miami!')).toBeVisible()
+  // Con su viaje disponible, viajes/disponibles da su nombre (docs/11 §2C).
+  await expect(ana.getByText('¡Luis Pérez tomó tu encomienda Bogota → Miami!')).toBeVisible()
   await expect(ana.getByText('1 tomada por un viajero.')).toBeVisible()
   await expect(ana.getByRole('link', { name: /Envíos, 1 nueva/ })).toBeVisible()
   await ana.getByRole('button', { name: 'Ver envío' }).click()
   await expect(ana.getByRole('img', { name: 'Estado: Tomada' }).first()).toBeVisible()
-  await expect(ana.getByText('Un viajero aceptó llevarla. Coordinen por chat dónde y cuándo se la entregas.')).toBeVisible()
+  await expect(ana.getByText('Luis Pérez aceptó llevarla. Coordinen por chat dónde y cuándo se la entregas.')).toBeVisible()
   await expect(ana.getByRole('listitem', { name: 'Tomada por un viajero: paso actual' })).toBeVisible()
   await ana.goto('/inicio')
   await expect(ana.getByText(/tomó tu encomienda/)).toHaveCount(0)
@@ -294,6 +305,38 @@ test('viajero: con encomiendas por entregar no deja cancelar el viaje', async ({
   await hoja.getByRole('button', { name: 'Entendido' }).click()
   expect(estado.viajes[0]!.estado).toBe('disponible')
   expect(estado.llamadas.some((l) => l.startsWith('PATCH'))).toBe(false)
+})
+
+test('remitente: viajeros de su ruta con nombre y nombre del viajero en sus envíos', async ({ page }) => {
+  const estado = crearEstado()
+  const ana = sembrarUsuario(estado, 'ana@prueba.co', 'Ana')
+  const luis = sembrarUsuario(estado, 'luis@prueba.co', 'Luis', 'Pérez')
+  sembrarViaje(estado, { uid: luis })
+  sembrarEncomienda(estado, { uid: ana, estado: 'tomada', viajeroId: luis })
+  await instalarApiFalsa(page, estado)
+  await conRol(page, 'ana@prueba.co', 'remitente')
+  await entrar(page, 'ana@prueba.co')
+  // El aviso ya trae el nombre: viajes/disponibles lo da mientras su viaje siga disponible (docs/11 §2C).
+  await page.goto('/remitente/viajeros?origen=Bogota&destino=Miami')
+  await expect(page.getByRole('group', { name: /^Viajero: Luis Pérez/ })).toBeVisible()
+  await page.goto('/remitente/viajeros?origen=Bogota&destino=Lima')
+  await expect(page.getByText('Nadie viaja Bogota → Lima por ahora')).toBeVisible()
+  await page.goto('/envios')
+  await page.getByRole('button', { name: /tomada por Luis Pérez/ }).click()
+  await expect(page.getByText('Luis Pérez aceptó llevarla. Coordinen por chat dónde y cuándo se la entregas.')).toBeVisible()
+})
+
+test('chat cerrado: al marcarla entregada se bloquea y dice desde cuándo', async ({ page }) => {
+  const estado = crearEstado()
+  const ana = sembrarUsuario(estado, 'ana@prueba.co', 'Ana')
+  const e = sembrarEncomienda(estado, { uid: ana, estado: 'entregada', viajeroId: 'uid-luis' })
+  await instalarApiFalsa(page, estado)
+  await conRol(page, 'ana@prueba.co', 'remitente')
+  await entrar(page, 'ana@prueba.co')
+  await page.goto(`/remitente/encomienda/${e._id}`)
+  await page.getByRole('button', { name: 'Ver chat' }).click()
+  await expect(page.getByText(/^Este chat se cerró el .+, cuando la encomienda se marcó como entregada\.$/)).toBeVisible()
+  await expect(page.getByLabel('Escribe un mensaje')).toHaveCount(0)
 })
 
 test('chat y asistente: mensajes, cierre por día y error con reintento', async ({ page }) => {

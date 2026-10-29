@@ -1,6 +1,7 @@
 import { useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useLocal, useRepos, useUid } from '../app/contexto'
 import { AppError } from '../core/red/errores'
+import { conNombresDeViajeros } from '../funciones/remitente/logica'
 import { combinarEntregas, paraTomar } from '../funciones/viajero/logica'
 import { Local } from './local'
 import type { Encomienda } from './modelos/encomienda'
@@ -16,16 +17,22 @@ export const Claves = {
   historial: (uid: string | null) => ['viajes', uid] as const,
   entregas: (uid: string | null) => ['entregas', uid] as const,
   disponibles: (uid: string | null) => ['disponibles', uid] as const,
-  viajeros: (ciudad: string) => ['viajeros', ciudad] as const,
+  viajeros: (origen: string, destino: string) => ['viajeros', origen, destino] as const,
   calificaciones: (uid: string) => ['calificaciones', uid] as const,
   paises: ['paises'] as const,
   ciudades: ['ciudades'] as const,
 }
 
+/** Mis encomiendas como remitente, con el nombre del viajero cuando se conoce: `GET /api/encomiendas`
+ *  no lo trae, pero `GET /api/viajes/disponibles` sí, mientras su viaje siga disponible (docs/11 §2C). */
 export function useMisEncomiendas() {
   const repos = useRepos()
   const uid = useUid()
-  return useQuery({ queryKey: Claves.misEncomiendas(uid), queryFn: repos.encomiendas.mias, enabled: uid !== null })
+  return useQuery({
+    queryKey: Claves.misEncomiendas(uid),
+    enabled: uid !== null,
+    queryFn: async () => conNombresDeViajeros(await repos.encomiendas.mias(), repos.viajes.disponiblesEnRuta),
+  })
 }
 
 export function useMiViaje() {
@@ -103,12 +110,13 @@ export function useDisponiblesEnMiRuta() {
   })
 }
 
-export function useViajerosPorOrigen(ciudad: string | null) {
+/** Viajeros con viaje disponible en la ruta, con nombre (pública). */
+export function useViajerosEnRuta(origen: string | null, destino: string | null) {
   const repos = useRepos()
   return useQuery({
-    queryKey: Claves.viajeros(ciudad ?? ''),
-    queryFn: () => repos.viajes.buscarPorOrigen(ciudad!),
-    enabled: ciudad !== null && ciudad !== '',
+    queryKey: Claves.viajeros(origen ?? '', destino ?? ''),
+    queryFn: () => repos.viajes.disponiblesEnRuta(origen!, destino!),
+    enabled: !!origen && !!destino,
   })
 }
 

@@ -147,3 +147,29 @@ export function actualizarVistos(lista: Encomienda[], vistos: EstadosVistos | nu
   }
   return nuevo
 }
+
+/**
+ * Completa `viajeroNombre` de las encomiendas con viajero: se pide una vez por ruta
+ * `viajes/disponibles` y se cruza por `uid`. Si falla o el viaje ya se cerró, quedan sin nombre.
+ */
+export async function conNombresDeViajeros(
+  lista: Encomienda[],
+  viajerosEnRuta: (origen: string, destino: string) => Promise<{ viajeroUid: string | null; viajeroNombre: string | null }[]>,
+): Promise<Encomienda[]> {
+  const sinNombre = lista.filter((e) => e.viajeroUid && !e.viajeroNombre)
+  const rutas = [...new Set(sinNombre.map((e) => `${e.ciudadOrigen}|${e.ciudadDestino}`))]
+  const nombres = new Map<string, string>()
+  await Promise.all(
+    rutas.map(async (r) => {
+      const [o, d] = r.split('|') as [string, string]
+      try {
+        for (const v of await viajerosEnRuta(o, d)) if (v.viajeroUid && v.viajeroNombre) nombres.set(v.viajeroUid, v.viajeroNombre)
+      } catch {
+        // Sin nombre se muestra "Un viajero": no vale la pena fallar la lista por esto.
+      }
+    }),
+  )
+  return lista.map((e) =>
+    e.viajeroUid && !e.viajeroNombre && nombres.has(e.viajeroUid) ? { ...e, viajeroNombre: nombres.get(e.viajeroUid)! } : e,
+  )
+}

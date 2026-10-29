@@ -12,6 +12,7 @@ const perfil = (d: Partial<Usuario> = {}): Usuario => ({
   telefono: '3001234567',
   nacionalidad: 'Colombia',
   email: null,
+  fechaNacimiento: null,
   rol: null,
   creadoEn: null,
   ...d,

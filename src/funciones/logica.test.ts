@@ -11,6 +11,7 @@ import { mensajeErrorChat } from './chat/servicio'
 import {
   actualizarVistos,
   agruparEnvios,
+  conNombresDeViajeros,
   nuevasTomadas,
   formatearMiles,
   parseValor,
@@ -140,6 +141,23 @@ describe('remitente', () => {
     expect(nuevasTomadas([tomadaA, b], { ...recargado, a: 'tomada' })).toEqual([])
     // Publicada desde otro dispositivo y ya tomada: también es nueva.
     expect(nuevasTomadas([e('c', { estado: 'tomada', viajero: 'v' })], base).map((x) => x.id)).toEqual(['c'])
+  })
+
+  it('conNombresDeViajeros: un pedido por ruta y, si falla, sin nombre', async () => {
+    const pedidos: string[] = []
+    const lista = [
+      e('1', { estado: 'tomada', viajero: 'v1' }),
+      e('2', { estado: 'entregada', viajero: 'v1' }),
+      e('3', { estado: 'disponible' }),
+    ]
+    const r = await conNombresDeViajeros(lista, async (o, d) => {
+      pedidos.push(`${o}→${d}`)
+      return [{ viajeroUid: 'v1', viajeroNombre: 'Luis Pérez' }]
+    })
+    expect(r.map((x) => x.viajeroNombre)).toEqual(['Luis Pérez', 'Luis Pérez', null])
+    expect(pedidos).toHaveLength(1)
+    const sinRed = await conNombresDeViajeros(lista, () => Promise.reject(new Error('sin red')))
+    expect(sinRed.map((x) => x.viajeroNombre)).toEqual([null, null, null])
   })
 
   it('conEstado conserva los demás datos', () => {
