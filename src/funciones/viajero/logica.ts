@@ -23,9 +23,9 @@ const prioridad = (e: EstadoEncomienda) =>
   e === 'tomada' ? 0 : e === 'disponible' ? 1 : esFinalizada(e) ? 2 : 3
 
 /**
- * "Mis entregas": no hay endpoint propio, así que se combinan las de
- * `GET /api/encomiendas` cuyo viajero soy yo y las que tomé desde este
- * dispositivo. Si está en ambos lados gana la del servidor (estado fresco).
+ * "Mis entregas": se combinan las `tomadas` de `GET /api/encomiendas/buscar` (solo las que siguen
+ * `tomada`, en la ruta de mi viaje) y las que tomé o entregué desde este dispositivo. Si está en ambos
+ * lados gana la del servidor (estado fresco).
  */
 export function combinarEntregas(d: { servidor: Encomienda[]; locales: Encomienda[]; uid: string }): Encomienda[] {
   const idsLocales = new Set(d.locales.map((e) => e.id))
@@ -43,8 +43,8 @@ export function combinarEntregas(d: { servidor: Encomienda[]; locales: Encomiend
   })
 }
 
-/** Las que puedo tomar: disponibles y no mías. `/disponibles` no trae el uid
- *  del remitente, por eso también se excluyen las que publiqué (`idsPropios`). */
+/** Las que puedo tomar: disponibles y no mías. `buscar` incluye las que publiqué yo y trae el uid
+ *  del remitente; `idsPropios` sirve para listas sin uid. */
 export function paraTomar(lista: Encomienda[], uid: string | null, idsPropios: Set<string> = new Set()): Encomienda[] {
   return lista.filter(
     (e) =>

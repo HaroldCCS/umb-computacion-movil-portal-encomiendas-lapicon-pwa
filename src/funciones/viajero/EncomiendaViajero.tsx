@@ -229,10 +229,9 @@ function Detalle({ inicial }: { inicial: Encomienda }) {
       <Grupo titulo="Remitente">
         <div className="p-4">
           {sinRemitente ? (
-            // El backend solo da el nombre (no el uid) en /disponibles.
+            // Solo pasa con encomiendas guardadas antes de usar /buscar, que trae el uid.
             <p className="text-[15px] text-texto2">
-              {e.remitenteNombre ? `La publicó ${e.remitenteNombre}` : 'El remitente'}. Podrás escribirle cuando te
-              escriba primero por el chat.
+              {e.remitenteNombre ? `La publicó ${e.remitenteNombre}.` : 'Remitente'}
             </p>
           ) : (
             <FilaConfianza uid={e.remitenteUid!} nombre={e.remitenteNombre} rol="Remitente" conRol plural="calificaciones" />

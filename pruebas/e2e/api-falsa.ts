@@ -178,6 +178,18 @@ async function responder(estado: EstadoApi, route: Route) {
         .map(({ uid, viajeroId: _v, ...e }) => ({ ...e, remitenteNombre: nombreDe(estado, uid) })),
     )
   }
+  if (metodo === 'GET' && ruta === '/api/encomiendas/buscar') {
+    const o = url.searchParams.get('origen')
+    const d = url.searchParams.get('destino')
+    if (!o || !d) return json(400, { error: 'Origen y destino son requeridos' })
+    // Como el real: con uid y remitenteNombre; incluye las propias; tomadas = solo las "tomada" mías.
+    const ruta2 = estado.encomiendas.filter((e) => e.ciudadOrigen === o && e.ciudadDestino === d)
+    const conNombre = (e: EncomiendaApi) => ({ ...e, remitenteNombre: nombreDe(estado, e.uid) })
+    return json(200, {
+      disponibles: ruta2.filter((e) => e.estado === 'disponible').map(conNombre),
+      tomadas: ruta2.filter((e) => e.estado === 'tomada' && e.viajeroId === yo).map(conNombre),
+    })
+  }
   if (metodo === 'POST' && ruta === '/api/encomiendas') {
     const e = sembrarEncomienda(estado, { uid: yo!, ...(cuerpo as Partial<EncomiendaApi>), fechaCreacion: hace(0) })
     return json(201, e)

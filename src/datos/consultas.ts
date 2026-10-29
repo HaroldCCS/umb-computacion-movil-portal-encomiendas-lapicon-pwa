@@ -4,6 +4,7 @@ import { AppError } from '../core/red/errores'
 import { combinarEntregas, paraTomar } from '../funciones/viajero/logica'
 import { Local } from './local'
 import type { Encomienda } from './modelos/encomienda'
+import type { BusquedaEncomiendas } from './repositorios'
 
 /**
  * Datos del servidor con TanStack Query (equivale a los FutureProvider de
@@ -47,50 +48,58 @@ export function useHistorialViajes() {
   })
 }
 
-/** Encomiendas que tomé (ver supuesto en `combinarEntregas`). */
-export function useMisEntregas() {
+/** `GET /api/encomiendas/buscar` en la ruta de mi viaje activo. Explorar y "Mis entregas" comparten
+ *  la misma consulta (misma clave), así que se pide una sola vez. */
+function useBusquedaEnMiRuta() {
   const repos = useRepos()
   const uid = useUid()
+  const viaje = useMiViaje()
+  const v = viaje.data
+  const clave = [...Claves.disponibles(uid), v?.ciudadOrigen, v?.ciudadDestino] as const
+  const buscar = (): Promise<BusquedaEncomiendas> =>
+    v ? repos.encomiendas.buscar(v.ciudadOrigen, v.ciudadDestino) : Promise.resolve({ disponibles: [], tomadas: [] })
+  return { viaje, clave, buscar }
+}
+
+/** Encomiendas que tomé: las `tomadas` del servidor en mi ruta más las guardadas en el dispositivo,
+ *  que siguen haciendo falta porque `buscar` deja de traerlas al entregarlas (ver `combinarEntregas`). */
+export function useMisEntregas() {
+  const qc = useQueryClient()
+  const uid = useUid()
   const version = useLocal()
+  const { viaje, clave, buscar } = useBusquedaEnMiRuta()
   return useQuery({
-    queryKey: [...Claves.entregas(uid), version],
-    enabled: uid !== null,
+    queryKey: [...Claves.entregas(uid), version, ...clave.slice(2)],
+    // Sin viaje (o si falla) quedan al menos las del dispositivo.
+    enabled: uid !== null && !viaje.isPending,
     placeholderData: (previo) => previo,
     queryFn: async (): Promise<Encomienda[]> => {
       if (!uid) return []
       const locales = Local.entregas(uid)
       let servidor: Encomienda[] = []
-      try {
-        servidor = await repos.encomiendas.mias()
-      } catch (e) {
-        // Sin servidor se muestran al menos las registradas en el dispositivo.
-        if (!(e instanceof AppError) || locales.length === 0) throw e
+      if (viaje.data) {
+        try {
+          servidor = (await qc.fetchQuery({ queryKey: clave, queryFn: buscar, staleTime: 5_000 })).tomadas
+        } catch (e) {
+          // Sin servidor se muestran al menos las registradas en el dispositivo.
+          if (!(e instanceof AppError) || locales.length === 0) throw e
+        }
       }
       return combinarEntregas({ servidor, locales, uid })
     },
   })
 }
 
-/** Disponibles en la ruta de mi viaje activo (sin las que publiqué yo). */
+/** Disponibles en la ruta de mi viaje activo (sin las que publiqué yo: `buscar` sí las incluye). */
 export function useDisponiblesEnMiRuta() {
-  const repos = useRepos()
   const uid = useUid()
-  const viaje = useMiViaje()
-  const v = viaje.data
+  const { viaje, clave, buscar } = useBusquedaEnMiRuta()
   return useQuery({
-    queryKey: [...Claves.disponibles(uid), v?.ciudadOrigen, v?.ciudadDestino],
+    queryKey: clave,
+    queryFn: buscar,
     enabled: uid !== null && viaje.isSuccess,
-    queryFn: async () => {
-      if (!v) return []
-      const lista = await repos.encomiendas.disponibles(v.ciudadOrigen, v.ciudadDestino)
-      let propias = new Set<string>()
-      try {
-        propias = new Set((await repos.encomiendas.mias()).map((e) => e.id))
-      } catch {
-        // Si falla, se muestran igual; el remitente no debería tomarlas.
-      }
-      return paraTomar(lista, uid, propias)
-    },
+    staleTime: 5_000,
+    select: (r: BusquedaEncomiendas) => paraTomar(r.disponibles, uid),
   })
 }
 

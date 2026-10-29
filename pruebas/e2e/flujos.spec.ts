@@ -107,12 +107,19 @@ test('de punta a punta: publicar, tomar, entregar y calificar (dos personas)', a
   await expect(luisP.getByText(/verific/i)).toHaveCount(0)
   await luisP.getByRole('link', { name: /Explorar/ }).click()
   await luisP.getByRole('button', { name: /te pagan COP 150\.000/ }).click()
-  await expect(luisP.getByText('La publicó Ana')).toBeVisible()
+  // buscar trae el uid del remitente: su fila con nombre y calificación (docs/11 §2B).
+  await expect(luisP.getByRole('group', { name: /^Remitente: Ana/ })).toBeVisible()
   await luisP.getByRole('button', { name: 'Tomar encomienda' }).click()
   await expect(luisP.getByRole('dialog')).toContainText('Eres responsable de lo que llevas')
   await luisP.getByRole('button', { name: 'Sí, tomarla' }).click()
   await expect(luisP.getByText('¡Listo! La encomienda es tuya.')).toBeVisible()
   await expect(luisP.getByRole('button', { name: 'Marcar como entregada' })).toBeVisible()
+  // El viajero escribe primero: el chat con el remitente ya está habilitado.
+  await luisP.getByRole('button', { name: 'Abrir chat con el remitente' }).click()
+  await expect(luisP).toHaveURL(new RegExp(`/chat/${uidDe('ana@prueba.co')}$`))
+  await luisP.getByLabel('Escribe un mensaje').fill('Hola Ana, ¿dónde te recojo el paquete?')
+  await luisP.getByRole('button', { name: 'Enviar mensaje' }).click()
+  await expect(luisP.getByRole('group', { name: /^Tú: Hola Ana/ })).toBeVisible()
 
   // Mi viaje avisa y el aviso lleva directo a "entregar" (deep link ?accion=).
   await luisP.goto('/mi-viaje')

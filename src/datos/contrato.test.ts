@@ -10,6 +10,7 @@ import { parseEstadoEncomienda, parseEstadoViaje } from './modelos/estado'
 import { leerFechaValor } from './modelos/json'
 import { usuarioDesdeJson, perfilCompleto } from './modelos/usuario'
 import { cuerpoViaje, viajeDesdeJson } from './modelos/viaje'
+import { paraTomar } from '../funciones/viajero/logica'
 import { crearRepositorios, limpiarLista, parseEstadoChat } from './repositorios'
 
 const DIR = join(__dirname, '../../pruebas/respuestas')
@@ -175,6 +176,22 @@ describe('repositorios (endpoints de la matriz §10.5)', () => {
     expect((err as ApiError).message).toMatch(/Ya tienes un viaje disponible/)
   })
 
+  it('buscar: disponibles y tomadas, con uid y nombre del remitente', async () => {
+    const { r } = repos({
+      'GET /api/encomiendas/buscar': [200, respuesta('fase0_buscar_tomada.json').respuesta],
+    })
+    const b = await r.encomiendas.buscar('Cali', 'Lima')
+    expect(b.disponibles).toEqual([])
+    expect(b.tomadas.map((e) => [e.estado, e.remitenteUid, e.remitenteNombre, e.viajeroUid])).toEqual([
+      ['tomada', 'Cpmc8Mv0CkTD0aJJMtiOBEzDNV03', 'Harold', 'IeMGfjHQ7XTc0W08QrTzx1flvo13'],
+    ])
+    const propia = await repos({
+      'GET /api/encomiendas/buscar': [200, respuesta('fase0_buscar_propia.json').respuesta],
+    }).r.encomiendas.buscar('Cali', 'Lima')
+    expect(propia.disponibles[0]!.remitenteUid).toBe('Cpmc8Mv0CkTD0aJJMtiOBEzDNV03')
+    expect(paraTomar(propia.disponibles, 'Cpmc8Mv0CkTD0aJJMtiOBEzDNV03')).toEqual([])
+  })
+
   it('cancelar viaje: PATCH con el estado; 404 si no es mío', async () => {
     const { r, llamadas } = repos({
       'PATCH /api/viajes/v1/estado': [200, respuesta('fase0_patch_viaje_cancelado.json').respuesta],
@@ -204,14 +221,14 @@ describe('repositorios (endpoints de la matriz §10.5)', () => {
     const { r, llamadas } = repos({
       'GET /api/ratings/u': [200, { total: 0, promedio: null, calificaciones: [] }],
       'GET /api/ciudades/paises': [200, ['Colombia', 'Peru']],
-      'GET /api/encomiendas/disponibles': [200, []],
+      'GET /api/encomiendas/buscar': [200, { disponibles: [], tomadas: [] }],
     })
     await r.calificaciones.resumen('u')
     await r.catalogo.paises()
-    await r.encomiendas.disponibles('Bogota', 'Miami')
+    await r.encomiendas.buscar('Bogota', 'Miami')
     const auth = llamadas.map((l) => (l.init.headers as Record<string, string>).Authorization ?? null)
     expect(auth).toEqual([null, null, 'Bearer tk'])
-    expect(llamadas[2]!.url).toBe('/api/encomiendas/disponibles?origen=Bogota&destino=Miami')
+    expect(llamadas[2]!.url).toBe('/api/encomiendas/buscar?origen=Bogota&destino=Miami')
   })
 
   it('el catálogo se guarda 7 días con las mismas claves de Flutter', async () => {

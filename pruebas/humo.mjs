@@ -38,6 +38,7 @@ const casos = [
   ['8 verificar vuelo', 'GET', '/api/vuelos/AV10/2026-12-01', true, [200, 404, 500]],
   ['10 mis encomiendas', 'GET', '/api/encomiendas', true, [200]],
   ['11 disponibles en ruta', 'GET', '/api/encomiendas/disponibles?origen=Bogota&destino=Miami', true, [200]],
+  ['11b buscar en ruta (viajero)', 'GET', '/api/encomiendas/buscar?origen=Bogota&destino=Miami', true, [200]],
   ['15 calificaciones (pública)', 'GET', `/api/ratings/${uid}`, false, [200]],
   ['16 estado del chat', 'GET', `/api/chats/estado/${uid}_x`, true, [200, 404, 500]],
   ['19 asistente', 'POST', '/api/chatbot', true, [200, 500], { mensajeUsuario: 'Hola' }],

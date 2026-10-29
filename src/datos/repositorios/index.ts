@@ -14,6 +14,12 @@ import { fechaIso } from '../../core/formato'
  * Repositorios = contrato de la API (docs/03), port de lib/data/repositories.
  * Las pantallas usan estos métodos; nunca `fetch` ni el cliente directo.
  */
+/** Respuesta de `GET /api/encomiendas/buscar`. */
+export interface BusquedaEncomiendas {
+  disponibles: Encomienda[]
+  tomadas: Encomienda[]
+}
+
 export function crearRepositorios(api: ClienteApi) {
   const listaEncomiendas = (json: unknown) =>
     desenvolverLista(json, ['encomiendas', 'data', 'items'])
@@ -105,9 +111,13 @@ export function crearRepositorios(api: ClienteApi) {
   const encomiendas = {
     /** Mis encomiendas como remitente (`GET /api/encomiendas`). */
     mias: async (): Promise<Encomienda[]> => listaEncomiendas(await api.get('/api/encomiendas')),
-    /** Las que un viajero puede tomar en su ruta. */
-    disponibles: async (origen: string, destino: string): Promise<Encomienda[]> =>
-      listaEncomiendas(await api.get('/api/encomiendas/disponibles', { query: { origen, destino } })),
+    /** Viajero, en una ruta (`GET /api/encomiendas/buscar`): las disponibles (incluye las mías como
+     *  remitente) y las que tomé, solo mientras siguen `tomada`. Todas con `uid` y `remitenteNombre`. */
+    async buscar(origen: string, destino: string): Promise<BusquedaEncomiendas> {
+      const json = await api.get('/api/encomiendas/buscar', { query: { origen, destino } })
+      const m = esMapa(json) ? json : {}
+      return { disponibles: listaEncomiendas(m['disponibles'] ?? []), tomadas: listaEncomiendas(m['tomadas'] ?? []) }
+    },
     /** `POST /api/encomiendas`. */
     crear: async (d: Parameters<typeof cuerpoEncomienda>[0]): Promise<Encomienda> =>
       encomiendaDesdeJson(await api.post('/api/encomiendas', { cuerpo: cuerpoEncomienda(d) })),
